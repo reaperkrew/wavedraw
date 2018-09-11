@@ -1,0 +1,27 @@
+{
+  "name": "wavedraw",
+  "version": "1.0.0",
+  "description": "Server side rendering of waveforms. Get the image of a wav audio file.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "wave",
+    "wav",
+    "draw",
+    "plot",
+    "graph",
+    "image",
+    "render"
+  ],
+  "author": "reaperkrew",
+  "license": "MIT",
+  "dependencies": {
+    "pureimage": "^0.1.6"
+  },
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "mocha": "^5.2.0"
+  }
+}
