@@ -10,7 +10,7 @@ This library currently supports only mono single channel wave files. I haven't t
 ## Usage
 
 ```javascript
-const wavedraw = require('../lib/wavedraw');
+const wavedraw = require('wavedraw');
 
 let wd = new wavedraw('test.wav');
 let options = {
