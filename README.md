@@ -35,7 +35,7 @@ wd.drawWave(options).then(() => {
 });
 ```
 
-![alt text](https://github.com/reaperkrew/wavedraw/blob/master/dist/example1.png "Waveform with maximums and RMS")
+(https://github.com/reaperkrew/wavedraw/blob/master/dist/example1.png)
 
 ### Todo
 * More unit tests
