@@ -34,8 +34,7 @@ wd.drawWave(options).then(() => {
   process.exit(0);
 });
 ```
-
-(https://github.com/reaperkrew/wavedraw/blob/master/dist/example1.png)
+![alt text](https://github.com/reaperkrew/wavedraw/blob/master/dist/example1.png)
 
 ### Todo
 * More unit tests
