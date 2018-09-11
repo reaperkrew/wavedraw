@@ -15,6 +15,10 @@
     "image",
     "render"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reaperkrew/wavedraw.git"
+  },
   "author": "reaperkrew",
   "license": "MIT",
   "dependencies": {
