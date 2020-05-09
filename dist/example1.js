@@ -1,7 +1,7 @@
 const wavedraw = require('../lib/wavedraw');
 
-let wd = new wavedraw('test.wav');
-let options = {
+const wd = new wavedraw('test.wav');
+const options = {
   width: 1200,
   height: 400,
   rms: true,
@@ -18,6 +18,4 @@ let options = {
   filename: 'example1.png'
 };
 
-wd.drawWave(options).then(() => {
-  process.exit(0);
-});
+wd.drawWave(options);
