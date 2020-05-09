@@ -1,6 +1,6 @@
 {
   "name": "wavedraw",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Server side rendering of waveforms. Get the image of a wav audio file.",
   "main": "index.js",
   "scripts": {
