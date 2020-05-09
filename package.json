@@ -4,7 +4,8 @@
   "description": "Server side rendering of waveforms. Get the image of a wav audio file.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "eslint lib"
   },
   "keywords": [
     "wave",
