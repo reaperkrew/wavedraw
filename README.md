@@ -11,9 +11,8 @@ This library currently supports only mono single channel wave files. I haven't t
 
 ```javascript
 const wavedraw = require('wavedraw');
-
-let wd = new wavedraw('test.wav');
-let options = {
+const wd = new wavedraw('test.wav');
+const options = {
   width: 1200,
   height: 400,
   rms: true,
@@ -30,9 +29,7 @@ let options = {
   filename: 'example1.png'
 };
 
-wd.drawWave(options).then(() => {
-  process.exit(0);
-});
+wd.drawWave(options);  // outputs wave drawing to example1.png
 ```
 ![alt text](https://github.com/reaperkrew/wavedraw/blob/master/dist/example1.png)
 
