@@ -1,9 +1,9 @@
-const wavedraw = require('../lib/wavedraw');
+const wavedraw = require('wavedraw');
 
 const wd = new wavedraw('test.wav');
 const options = {
-  width: 180,
-  height: 100,
+  width: 600,
+  height: 300,
   rms: true,
   maximums: true,
   average: false,
@@ -14,7 +14,6 @@ const options = {
     rms: '#659df7',
     background: '#ffffff'
   },
-  ceiling: 30000,
   filename: 'example1.png'
 };
 
