@@ -13,8 +13,8 @@ This library currently supports only mono single channel wave files. I haven't t
 const wavedraw = require('wavedraw');
 const wd = new wavedraw('test.wav');
 const options = {
-  width: 1200,
-  height: 400,
+  width: 600,
+  height: 300,
   rms: true,
   maximums: true,
   average: false,
@@ -25,15 +25,13 @@ const options = {
     rms: '#659df7',
     background: '#ffffff'
   },
-  ceiling: 80000,
   filename: 'example1.png'
 };
 
 wd.drawWave(options);  // outputs wave drawing to example1.png
 ```
-![alt text](https://github.com/reaperkrew/wavedraw/blob/master/dist/example1.png)
+![alt text](https://usaluyin.s3.amazonaws.com/public/example1.png)
 
 ### Todo
-* More unit tests
-* Support for multi channel
-* Better documentation
+- [] More unit tests
+- [] Ability to draw mel spectrograms
