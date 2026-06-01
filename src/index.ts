@@ -27,6 +27,7 @@ export interface ParseWavOptions {
 export interface ReadWavFileOptions extends ParseWavOptions {}
 
 export type WaveformChannel = number | "mix" | "all";
+export type SpectrogramChannel = number | "mix";
 export type WaveformMetric = "peaks" | "rms" | "average";
 
 export interface SummarizeWaveformOptions {
@@ -58,6 +59,37 @@ export interface WaveformSummary {
   channels: WaveformChannelSummary[];
 }
 
+export interface SummarizeMelSpectrogramOptions {
+  width: number;
+  channel?: SpectrogramChannel;
+  startSeconds?: number;
+  endSeconds?: number;
+  fftSize?: number;
+  melBands?: number;
+  minFrequency?: number;
+  maxFrequency?: number;
+  dynamicRangeDb?: number;
+}
+
+export interface MelSpectrogramFrame {
+  values: number[];
+}
+
+export interface MelSpectrogramSummary {
+  width: number;
+  sampleRate: number;
+  startSeconds: number;
+  endSeconds: number;
+  frames: number;
+  fftSize: number;
+  melBands: number;
+  minFrequency: number;
+  maxFrequency: number;
+  minDecibels: number;
+  maxDecibels: number;
+  spectrogram: MelSpectrogramFrame[];
+}
+
 export interface WaveformLayerStyle {
   color?: string;
   strokeWidth?: number;
@@ -75,6 +107,16 @@ export interface RenderWaveformSvgOptions {
   };
 }
 
+export interface RenderMelSpectrogramSvgOptions {
+  width?: number;
+  height: number;
+  background?: string;
+  padding?: number;
+  colors?: string[];
+}
+
+type TimeOption = "START" | "END" | number | string;
+
 export interface DrawWaveOptions extends Omit<SummarizeWaveformOptions, "startSeconds" | "endSeconds" | "metrics"> {
   height: number;
   output?: string;
@@ -91,8 +133,19 @@ export interface DrawWaveOptions extends Omit<SummarizeWaveformOptions, "startSe
   peaks?: boolean;
   rms?: boolean;
   average?: boolean;
-  start?: "START" | number | string;
-  end?: "END" | number | string;
+  start?: TimeOption;
+  end?: TimeOption;
+}
+
+export interface DrawMelSpectrogramOptions extends Omit<SummarizeMelSpectrogramOptions, "startSeconds" | "endSeconds"> {
+  height: number;
+  output?: string;
+  filename?: string;
+  background?: string;
+  colors?: string[];
+  padding?: number;
+  start?: TimeOption;
+  end?: TimeOption;
 }
 
 const RIFF = "RIFF";
@@ -178,20 +231,7 @@ export function parseWav(input: Buffer | ArrayBuffer | Uint8Array, _options: Par
 export function summarizeWaveform(audio: WavAudio, options: SummarizeWaveformOptions): WaveformSummary {
   validatePositiveInteger("width", options.width);
 
-  const startSeconds = options.startSeconds ?? 0;
-  const endSeconds = options.endSeconds ?? audio.durationSeconds;
-
-  if (!Number.isFinite(startSeconds) || startSeconds < 0) {
-    throw new Error("startSeconds must be a finite number greater than or equal to 0");
-  }
-
-  if (!Number.isFinite(endSeconds) || endSeconds <= startSeconds) {
-    throw new Error("endSeconds must be greater than startSeconds");
-  }
-
-  if (endSeconds > audio.durationSeconds) {
-    throw new Error("endSeconds exceeds audio duration");
-  }
+  const { startSeconds, endSeconds } = normalizeTimeRange(audio, options.startSeconds, options.endSeconds);
 
   const startFrame = Math.floor(startSeconds * audio.format.sampleRate);
   const endFrame = Math.min(audio.frames, Math.ceil(endSeconds * audio.format.sampleRate));
@@ -208,6 +248,84 @@ export function summarizeWaveform(audio: WavAudio, options: SummarizeWaveformOpt
     channels: selectedChannels.map((channel) => ({
       channel: channel.channel,
       columns: summarizeChannel(channel.samples, startFrame, endFrame, options.width, metrics)
+    }))
+  };
+}
+
+export function summarizeMelSpectrogram(audio: WavAudio, options: SummarizeMelSpectrogramOptions): MelSpectrogramSummary {
+  validatePositiveInteger("width", options.width);
+
+  const fftSize = options.fftSize ?? 1024;
+  validatePositiveInteger("fftSize", fftSize);
+  if (fftSize < 2) {
+    throw new Error("fftSize must be at least 2");
+  }
+
+  const melBands = options.melBands ?? 64;
+  validatePositiveInteger("melBands", melBands);
+
+  const minFrequency = options.minFrequency ?? 0;
+  const maxFrequency = options.maxFrequency ?? audio.format.sampleRate / 2;
+  validateFrequencyRange(audio.format.sampleRate, minFrequency, maxFrequency);
+
+  const dynamicRangeDb = options.dynamicRangeDb ?? 80;
+  if (!Number.isFinite(dynamicRangeDb) || dynamicRangeDb <= 0) {
+    throw new Error("dynamicRangeDb must be a finite number greater than 0");
+  }
+
+  const { startSeconds, endSeconds } = normalizeTimeRange(audio, options.startSeconds, options.endSeconds);
+  const startFrame = Math.floor(startSeconds * audio.format.sampleRate);
+  const endFrame = Math.min(audio.frames, Math.ceil(endSeconds * audio.format.sampleRate));
+  const selectedFrames = Math.max(0, endFrame - startFrame);
+  const selectedChannels = selectChannels(audio, options.channel ?? "mix");
+  const samples = selectedChannels[0]!.samples;
+  const window = hannWindow(fftSize);
+  const filterbank = createMelFilterbank({
+    fftSize,
+    melBands,
+    sampleRate: audio.format.sampleRate,
+    minFrequency,
+    maxFrequency
+  });
+  const rawFrames: number[][] = [];
+  let maxDecibels = Number.NEGATIVE_INFINITY;
+
+  for (let x = 0; x < options.width; x += 1) {
+    const frameStart = startFrame + Math.floor((x * selectedFrames) / options.width);
+    const powerSpectrum = computePowerSpectrum(samples, frameStart, endFrame, fftSize, window);
+    const melValues = filterbank.map((weights) => {
+      let energy = 0;
+      for (let index = 0; index < weights.length; index += 1) {
+        energy += (powerSpectrum[index] ?? 0) * (weights[index] ?? 0);
+      }
+      const decibels = 10 * Math.log10(Math.max(energy, 1e-12));
+      if (decibels > maxDecibels) {
+        maxDecibels = decibels;
+      }
+      return decibels;
+    });
+    rawFrames.push(melValues);
+  }
+
+  if (!Number.isFinite(maxDecibels)) {
+    maxDecibels = -120;
+  }
+  const minDecibels = maxDecibels - dynamicRangeDb;
+
+  return {
+    width: options.width,
+    sampleRate: audio.format.sampleRate,
+    startSeconds,
+    endSeconds,
+    frames: selectedFrames,
+    fftSize,
+    melBands,
+    minFrequency,
+    maxFrequency,
+    minDecibels,
+    maxDecibels,
+    spectrogram: rawFrames.map((values) => ({
+      values: values.map((value) => clamp((value - minDecibels) / dynamicRangeDb, 0, 1))
     }))
   };
 }
@@ -279,6 +397,48 @@ export function renderWaveformSvg(summary: WaveformSummary, options: RenderWavef
   return elements.join("");
 }
 
+export function renderMelSpectrogramSvg(summary: MelSpectrogramSummary, options: RenderMelSpectrogramSvgOptions): string {
+  const width = options.width ?? summary.width;
+  const { height } = options;
+  validatePositiveInteger("width", width);
+  validatePositiveInteger("height", height);
+
+  const padding = options.padding ?? 0;
+  if (!Number.isFinite(padding) || padding < 0 || padding * 2 >= height || padding * 2 >= width) {
+    throw new Error("padding must be finite, non-negative, and smaller than half the dimensions");
+  }
+
+  const colors = normalizeColorStops(options.colors ?? ["#020617", "#0f766e", "#facc15", "#f8fafc"]);
+  const plotWidth = width - padding * 2;
+  const plotHeight = height - padding * 2;
+  const columnWidth = plotWidth / summary.width;
+  const bandHeight = plotHeight / summary.melBands;
+  const elements: string[] = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Mel spectrogram">`
+  ];
+
+  if (options.background) {
+    elements.push(`<rect width="100%" height="100%" fill="${escapeAttribute(options.background)}"/>`);
+  }
+
+  for (let x = 0; x < summary.spectrogram.length; x += 1) {
+    const frame = summary.spectrogram[x]!;
+    for (let band = 0; band < summary.melBands; band += 1) {
+      const value = clamp(frame.values[band] ?? 0, 0, 1);
+      const rectX = formatNumber(padding + x * columnWidth);
+      const rectY = formatNumber(padding + (summary.melBands - band - 1) * bandHeight);
+      const rectWidth = formatNumber(Math.ceil((x + 1) * columnWidth) - Math.floor(x * columnWidth));
+      const rectHeight = formatNumber(Math.ceil((band + 1) * bandHeight) - Math.floor(band * bandHeight));
+      elements.push(
+        `<rect x="${rectX}" y="${rectY}" width="${rectWidth}" height="${rectHeight}" fill="${interpolateColorStops(colors, value)}"/>`
+      );
+    }
+  }
+
+  elements.push("</svg>");
+  return elements.join("");
+}
+
 export async function drawWave(path: string, options: DrawWaveOptions): Promise<string> {
   const audio = await readWavFile(path);
   const metrics: WaveformMetric[] = [];
@@ -317,6 +477,37 @@ export async function drawWave(path: string, options: DrawWaveOptions): Promise<
 
   const svg = renderWaveformSvg(summary, renderOptions);
 
+  const output = options.output ?? options.filename;
+  if (output) {
+    await writeFile(output, svg);
+  }
+  return svg;
+}
+
+export async function drawMelSpectrogram(path: string, options: DrawMelSpectrogramOptions): Promise<string> {
+  const audio = await readWavFile(path);
+  const summaryOptions: SummarizeMelSpectrogramOptions = {
+    width: options.width,
+    channel: options.channel ?? "mix",
+    startSeconds: normalizeTimeOption(options.start, 0),
+    endSeconds: normalizeTimeOption(options.end, audio.durationSeconds)
+  };
+  if (options.fftSize !== undefined) summaryOptions.fftSize = options.fftSize;
+  if (options.melBands !== undefined) summaryOptions.melBands = options.melBands;
+  if (options.minFrequency !== undefined) summaryOptions.minFrequency = options.minFrequency;
+  if (options.maxFrequency !== undefined) summaryOptions.maxFrequency = options.maxFrequency;
+  if (options.dynamicRangeDb !== undefined) summaryOptions.dynamicRangeDb = options.dynamicRangeDb;
+
+  const summary = summarizeMelSpectrogram(audio, summaryOptions);
+  const renderOptions: RenderMelSpectrogramSvgOptions = {
+    width: options.width,
+    height: options.height
+  };
+  if (options.padding !== undefined) renderOptions.padding = options.padding;
+  if (options.colors !== undefined) renderOptions.colors = options.colors;
+  if (options.background !== undefined) renderOptions.background = options.background;
+
+  const svg = renderMelSpectrogramSvg(summary, renderOptions);
   const output = options.output ?? options.filename;
   if (output) {
     await writeFile(output, svg);
@@ -509,6 +700,170 @@ function summarizeChannel(
   }
 
   return columns;
+}
+
+function normalizeTimeRange(
+  audio: WavAudio,
+  startSecondsOption: number | undefined,
+  endSecondsOption: number | undefined
+): { startSeconds: number; endSeconds: number } {
+  const startSeconds = startSecondsOption ?? 0;
+  const endSeconds = endSecondsOption ?? audio.durationSeconds;
+
+  if (!Number.isFinite(startSeconds) || startSeconds < 0) {
+    throw new Error("startSeconds must be a finite number greater than or equal to 0");
+  }
+
+  if (!Number.isFinite(endSeconds) || endSeconds <= startSeconds) {
+    throw new Error("endSeconds must be greater than startSeconds");
+  }
+
+  if (endSeconds > audio.durationSeconds) {
+    throw new Error("endSeconds exceeds audio duration");
+  }
+
+  return { startSeconds, endSeconds };
+}
+
+interface MelFilterbankOptions {
+  fftSize: number;
+  melBands: number;
+  sampleRate: number;
+  minFrequency: number;
+  maxFrequency: number;
+}
+
+function validateFrequencyRange(sampleRate: number, minFrequency: number, maxFrequency: number): void {
+  const nyquist = sampleRate / 2;
+  if (!Number.isFinite(minFrequency) || minFrequency < 0) {
+    throw new Error("minFrequency must be a finite number greater than or equal to 0");
+  }
+  if (!Number.isFinite(maxFrequency) || maxFrequency <= minFrequency) {
+    throw new Error("maxFrequency must be greater than minFrequency");
+  }
+  if (maxFrequency > nyquist) {
+    throw new Error("maxFrequency cannot exceed the Nyquist frequency");
+  }
+}
+
+function createMelFilterbank(options: MelFilterbankOptions): number[][] {
+  const melMin = hertzToMel(options.minFrequency);
+  const melMax = hertzToMel(options.maxFrequency);
+  const melPoints = Array.from({ length: options.melBands + 2 }, (_, index) => {
+    const ratio = index / (options.melBands + 1);
+    return melToHertz(melMin + (melMax - melMin) * ratio);
+  });
+  const bins = Math.floor(options.fftSize / 2) + 1;
+
+  return Array.from({ length: options.melBands }, (_, band) => {
+    const lower = melPoints[band]!;
+    const center = melPoints[band + 1]!;
+    const upper = melPoints[band + 2]!;
+    const weights = new Array<number>(bins).fill(0);
+
+    for (let bin = 0; bin < bins; bin += 1) {
+      const frequency = (bin * options.sampleRate) / options.fftSize;
+      if (frequency >= lower && frequency <= center && center > lower) {
+        weights[bin] = (frequency - lower) / (center - lower);
+      } else if (frequency > center && frequency <= upper && upper > center) {
+        weights[bin] = (upper - frequency) / (upper - center);
+      }
+    }
+
+    const sum = weights.reduce((total, weight) => total + weight, 0);
+    return sum > 0 ? weights.map((weight) => weight / sum) : weights;
+  });
+}
+
+function computePowerSpectrum(
+  samples: Float32Array,
+  frameStart: number,
+  endFrame: number,
+  fftSize: number,
+  window: Float64Array
+): number[] {
+  const bins = Math.floor(fftSize / 2) + 1;
+  const spectrum = new Array<number>(bins).fill(0);
+
+  for (let bin = 0; bin < bins; bin += 1) {
+    let real = 0;
+    let imaginary = 0;
+    for (let index = 0; index < fftSize; index += 1) {
+      const sampleIndex = frameStart + index;
+      const sample = sampleIndex < endFrame ? samples[sampleIndex] ?? 0 : 0;
+      const windowed = sample * window[index]!;
+      const angle = (2 * Math.PI * bin * index) / fftSize;
+      real += windowed * Math.cos(angle);
+      imaginary -= windowed * Math.sin(angle);
+    }
+    spectrum[bin] = (real * real + imaginary * imaginary) / fftSize;
+  }
+
+  return spectrum;
+}
+
+function hannWindow(size: number): Float64Array {
+  if (size === 1) {
+    return new Float64Array([1]);
+  }
+  return Float64Array.from({ length: size }, (_, index) => 0.5 - 0.5 * Math.cos((2 * Math.PI * index) / (size - 1)));
+}
+
+function hertzToMel(value: number): number {
+  return 2595 * Math.log10(1 + value / 700);
+}
+
+function melToHertz(value: number): number {
+  return 700 * (10 ** (value / 2595) - 1);
+}
+
+interface RgbColor {
+  red: number;
+  green: number;
+  blue: number;
+}
+
+function normalizeColorStops(colors: string[]): RgbColor[] {
+  if (colors.length < 2) {
+    throw new Error("colors must include at least two color stops");
+  }
+  return colors.map(parseHexColor);
+}
+
+function parseHexColor(color: string): RgbColor {
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/iu.exec(color);
+  if (!match) {
+    throw new Error("colors must be hex strings in #rgb or #rrggbb format");
+  }
+
+  const hex = match[1]!;
+  const normalized = hex.length === 3 ? hex.split("").map((part) => part + part).join("") : hex;
+  return {
+    red: Number.parseInt(normalized.slice(0, 2), 16),
+    green: Number.parseInt(normalized.slice(2, 4), 16),
+    blue: Number.parseInt(normalized.slice(4, 6), 16)
+  };
+}
+
+function interpolateColorStops(colors: RgbColor[], value: number): string {
+  const scaled = clamp(value, 0, 1) * (colors.length - 1);
+  const index = Math.min(colors.length - 2, Math.floor(scaled));
+  const ratio = scaled - index;
+  const start = colors[index]!;
+  const end = colors[index + 1]!;
+  return rgbToHex({
+    red: Math.round(start.red + (end.red - start.red) * ratio),
+    green: Math.round(start.green + (end.green - start.green) * ratio),
+    blue: Math.round(start.blue + (end.blue - start.blue) * ratio)
+  });
+}
+
+function rgbToHex(color: RgbColor): string {
+  return `#${toHexByte(color.red)}${toHexByte(color.green)}${toHexByte(color.blue)}`;
+}
+
+function toHexByte(value: number): string {
+  return Math.round(clamp(value, 0, 255)).toString(16).padStart(2, "0");
 }
 
 function normalizeLayer(style: WaveformLayerStyle): Required<WaveformLayerStyle> {

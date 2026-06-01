@@ -21,6 +21,7 @@ export interface ParseWavOptions {
 export interface ReadWavFileOptions extends ParseWavOptions {
 }
 export type WaveformChannel = number | "mix" | "all";
+export type SpectrogramChannel = number | "mix";
 export type WaveformMetric = "peaks" | "rms" | "average";
 export interface SummarizeWaveformOptions {
     width: number;
@@ -47,6 +48,34 @@ export interface WaveformSummary {
     frames: number;
     channels: WaveformChannelSummary[];
 }
+export interface SummarizeMelSpectrogramOptions {
+    width: number;
+    channel?: SpectrogramChannel;
+    startSeconds?: number;
+    endSeconds?: number;
+    fftSize?: number;
+    melBands?: number;
+    minFrequency?: number;
+    maxFrequency?: number;
+    dynamicRangeDb?: number;
+}
+export interface MelSpectrogramFrame {
+    values: number[];
+}
+export interface MelSpectrogramSummary {
+    width: number;
+    sampleRate: number;
+    startSeconds: number;
+    endSeconds: number;
+    frames: number;
+    fftSize: number;
+    melBands: number;
+    minFrequency: number;
+    maxFrequency: number;
+    minDecibels: number;
+    maxDecibels: number;
+    spectrogram: MelSpectrogramFrame[];
+}
 export interface WaveformLayerStyle {
     color?: string;
     strokeWidth?: number;
@@ -62,6 +91,14 @@ export interface RenderWaveformSvgOptions {
         average?: WaveformLayerStyle | false;
     };
 }
+export interface RenderMelSpectrogramSvgOptions {
+    width?: number;
+    height: number;
+    background?: string;
+    padding?: number;
+    colors?: string[];
+}
+type TimeOption = "START" | "END" | number | string;
 export interface DrawWaveOptions extends Omit<SummarizeWaveformOptions, "startSeconds" | "endSeconds" | "metrics"> {
     height: number;
     output?: string;
@@ -78,12 +115,26 @@ export interface DrawWaveOptions extends Omit<SummarizeWaveformOptions, "startSe
     peaks?: boolean;
     rms?: boolean;
     average?: boolean;
-    start?: "START" | number | string;
-    end?: "END" | number | string;
+    start?: TimeOption;
+    end?: TimeOption;
+}
+export interface DrawMelSpectrogramOptions extends Omit<SummarizeMelSpectrogramOptions, "startSeconds" | "endSeconds"> {
+    height: number;
+    output?: string;
+    filename?: string;
+    background?: string;
+    colors?: string[];
+    padding?: number;
+    start?: TimeOption;
+    end?: TimeOption;
 }
 export declare function readWavFile(path: string, options?: ReadWavFileOptions): Promise<WavAudio>;
 export declare function parseWav(input: Buffer | ArrayBuffer | Uint8Array, _options?: ParseWavOptions): WavAudio;
 export declare function summarizeWaveform(audio: WavAudio, options: SummarizeWaveformOptions): WaveformSummary;
+export declare function summarizeMelSpectrogram(audio: WavAudio, options: SummarizeMelSpectrogramOptions): MelSpectrogramSummary;
 export declare function renderWaveformSvg(summary: WaveformSummary, options: RenderWaveformSvgOptions): string;
+export declare function renderMelSpectrogramSvg(summary: MelSpectrogramSummary, options: RenderMelSpectrogramSvgOptions): string;
 export declare function drawWave(path: string, options: DrawWaveOptions): Promise<string>;
+export declare function drawMelSpectrogram(path: string, options: DrawMelSpectrogramOptions): Promise<string>;
+export {};
 //# sourceMappingURL=index.d.ts.map

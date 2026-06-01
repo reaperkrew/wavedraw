@@ -2,7 +2,7 @@
 
 Dependency-light WAV parsing and waveform rendering for Node.js.
 
-`wavedraw` v2 is a TypeScript rewrite. The core package has no runtime dependencies: it parses WAV data, summarizes peaks/RMS/average waveform columns, and renders SVG directly.
+`wavedraw` v2 is a TypeScript rewrite. The core package has no runtime dependencies: it parses WAV data, summarizes peaks/RMS/average waveform columns and Mel spectrograms, and renders SVG directly.
 
 ## Installation
 
@@ -28,6 +28,20 @@ await drawWave("input.wav", {
   }
 });
 ```
+
+## Example Output
+
+### Waveform
+
+![Rendered waveform](docs/images/waveform.svg)
+
+### Waveform with RMS
+
+![Rendered waveform with RMS layer](docs/images/waveform-rms.svg)
+
+### Mel Spectrogram
+
+![Rendered Mel spectrogram](docs/images/mel-spectrogram.svg)
 
 ## Extract Waveform Data
 
@@ -60,6 +74,27 @@ const svg = renderWaveformSvg(waveform, {
 });
 ```
 
+## Mel Spectrograms
+
+```ts
+import { drawMelSpectrogram } from "wavedraw";
+
+await drawMelSpectrogram("input.wav", {
+  width: 1200,
+  height: 360,
+  fftSize: 1024,
+  melBands: 80,
+  minFrequency: 20,
+  maxFrequency: 8000,
+  dynamicRangeDb: 80,
+  output: "mel-spectrogram.svg",
+  background: "#020617",
+  colors: ["#020617", "#0f766e", "#facc15", "#f8fafc"]
+});
+```
+
+Use `summarizeMelSpectrogram()` when you need normalized Mel-band data, or `renderMelSpectrogramSvg()` when you already have a summary and only need SVG output.
+
 ## Supported WAV Input
 
 - RIFF/WAVE PCM files with chunk-aware parsing.
@@ -80,4 +115,3 @@ const svg = renderWaveformSvg(waveform, {
 ## Roadmap
 
 - Optional PNG rendering without a broad canvas dependency.
-- Mel spectrogram analysis and rendering.
