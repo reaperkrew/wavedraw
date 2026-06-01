@@ -1,11 +1,29 @@
 {
   "name": "wavedraw",
-  "version": "1.1.0",
-  "description": "Server side rendering of waveforms. Get the image of a wav audio file.",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Dependency-light WAV parsing and waveform rendering for Node.js.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "mocha",
-    "lint": "eslint lib"
+    "clean": "node -e \"require(\\\"node:fs\\\").rmSync(\\\"dist\\\",{recursive:true,force:true})\"",
+    "lint": "tsc --noEmit",
+    "build": "npm run clean && tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build"
   },
   "keywords": [
     "wave",
@@ -14,7 +32,10 @@
     "plot",
     "graph",
     "image",
-    "render"
+    "render",
+    "rms",
+    "svg",
+    "audio"
   ],
   "repository": {
     "type": "git",
@@ -22,14 +43,9 @@
   },
   "author": "reaperkrew",
   "license": "MIT",
-  "dependencies": {
-    "pureimage": "^0.1.6"
-  },
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.2",
-    "expect.js": "^0.3.1",
-    "mocha": "^7.1.2"
+    "@types/node": "^22.19.19",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
   }
 }

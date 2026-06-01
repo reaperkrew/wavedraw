@@ -1,37 +1,83 @@
-# wavedraw for node.js
+# wavedraw
 
-This library currently supports only mono single channel wave files. I haven't tried it with 8 bit wave. I suggest using 16 bit, mono at 44100.
+Dependency-light WAV parsing and waveform rendering for Node.js.
+
+`wavedraw` v2 is a TypeScript rewrite. The core package has no runtime dependencies: it parses WAV data, summarizes peaks/RMS/average waveform columns, and renders SVG directly.
 
 ## Installation
 
-`npm install wavedraw`
+```bash
+npm install wavedraw
+```
 
+## Quick Start
 
-## Usage
+```ts
+import { drawWave } from "wavedraw";
 
-```javascript
-const wavedraw = require('wavedraw');
-const wd = new wavedraw('test.wav');
-const options = {
+await drawWave("input.wav", {
   width: 600,
   height: 300,
-  rms: true,
   maximums: true,
-  average: false,
-  start: 'START',
-  end: 'END',
+  rms: true,
+  output: "wave.svg",
   colors: {
-    maximums: '#0000ff',
-    rms: '#659df7',
-    background: '#ffffff'
-  },
-  filename: 'example1.png'
-};
-
-wd.drawWave(options);  // outputs wave drawing to example1.png
+    maximums: "#2563eb",
+    rms: "#60a5fa",
+    background: "#ffffff"
+  }
+});
 ```
-![alt text](https://usaluyin.s3.amazonaws.com/public/example1.png)
 
-### Todo
-- [] More unit tests
-- [] Ability to draw mel spectrograms
+## Extract Waveform Data
+
+```ts
+import { readWavFile, summarizeWaveform } from "wavedraw";
+
+const audio = await readWavFile("input.wav");
+const waveform = summarizeWaveform(audio, {
+  width: 1200,
+  channel: "mix",
+  metrics: ["peaks", "rms"],
+  startSeconds: 0,
+  endSeconds: 30
+});
+```
+
+## Render SVG
+
+```ts
+import { renderWaveformSvg } from "wavedraw";
+
+const svg = renderWaveformSvg(waveform, {
+  width: 1200,
+  height: 300,
+  background: "#fff",
+  layers: {
+    peaks: { color: "#2563eb" },
+    rms: { color: "#60a5fa" }
+  }
+});
+```
+
+## Supported WAV Input
+
+- RIFF/WAVE PCM files with chunk-aware parsing.
+- Mono and stereo.
+- 8-bit unsigned PCM.
+- 16-bit signed PCM.
+- 24-bit signed PCM.
+- 32-bit signed PCM.
+- 32-bit float WAV.
+
+## v1 Migration Notes
+
+- The old class API is replaced by functions.
+- `maximums` is still accepted by `drawWave()`, but the lower-level API calls this metric `peaks`.
+- SVG is the default renderer. PNG output is intentionally not part of the v2.0 core dependency surface.
+- Time ranges should use seconds. `drawWave()` still accepts legacy `HH:MM:SS` strings for `start` and `end`.
+
+## Roadmap
+
+- Optional PNG rendering without a broad canvas dependency.
+- Mel spectrogram analysis and rendering.
