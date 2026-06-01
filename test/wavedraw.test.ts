@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { drawWave, parseWav, renderWaveformSvg, summarizeWaveform } from "../src/index.js";
+import { drawMelSpectrogram, drawWave, parseWav, renderMelSpectrogramSvg, renderWaveformSvg, summarizeMelSpectrogram, summarizeWaveform } from "../src/index.js";
 
 describe("parseWav", () => {
   it("parses 16-bit mono PCM and normalizes samples", () => {
@@ -208,6 +208,83 @@ describe("renderWaveformSvg", () => {
   });
 });
 
+
+describe("summarizeMelSpectrogram", () => {
+  it("computes normalized Mel energy frames", () => {
+    const samples = Array.from({ length: 64 }, (_, frame) => Math.round(Math.sin((2 * Math.PI * frame) / 8) * 24000));
+    const audio = parseWav(makePcmWav({
+      channels: 1,
+      sampleRate: 64,
+      bitsPerSample: 16,
+      samples: [samples]
+    }));
+
+    const summary = summarizeMelSpectrogram(audio, {
+      width: 4,
+      fftSize: 16,
+      melBands: 6,
+      minFrequency: 0,
+      maxFrequency: 32,
+      dynamicRangeDb: 60
+    });
+
+    expect(summary.width).toBe(4);
+    expect(summary.fftSize).toBe(16);
+    expect(summary.melBands).toBe(6);
+    expect(summary.spectrogram).toHaveLength(4);
+    expect(summary.spectrogram[0]!.values).toHaveLength(6);
+    expect(summary.maxDecibels).toBeGreaterThan(summary.minDecibels);
+    expect(summary.spectrogram.flatMap((frame) => frame.values).every((value) => value >= 0 && value <= 1)).toBe(true);
+  });
+
+  it("validates Mel spectrogram options", () => {
+    const audio = parseWav(makePcmWav({
+      channels: 1,
+      sampleRate: 16,
+      bitsPerSample: 16,
+      samples: [[0, 0, 0, 0]]
+    }));
+
+    expect(() => summarizeMelSpectrogram(audio, { width: 0 })).toThrow("width must be a positive integer");
+    expect(() => summarizeMelSpectrogram(audio, { width: 1, fftSize: 1 })).toThrow("fftSize must be at least 2");
+    expect(() => summarizeMelSpectrogram(audio, { width: 1, maxFrequency: 9 })).toThrow("maxFrequency cannot exceed the Nyquist frequency");
+  });
+});
+
+describe("renderMelSpectrogramSvg", () => {
+  it("renders deterministic SVG rectangles with interpolated colors", () => {
+    const svg = renderMelSpectrogramSvg({
+      width: 2,
+      sampleRate: 16,
+      startSeconds: 0,
+      endSeconds: 1,
+      frames: 16,
+      fftSize: 8,
+      melBands: 2,
+      minFrequency: 0,
+      maxFrequency: 8,
+      minDecibels: -80,
+      maxDecibels: 0,
+      spectrogram: [
+        { values: [0, 0.5] },
+        { values: [1, 0.25] }
+      ]
+    }, {
+      width: 20,
+      height: 10,
+      background: "#000",
+      colors: ["#000000", "#ffffff"]
+    });
+
+    expect(svg).toContain('aria-label="Mel spectrogram"');
+    expect(svg).toContain('fill="#000"');
+    expect(svg).toContain('fill="#808080"');
+    expect(svg).toContain('fill="#ffffff"');
+    expect(svg).toContain("</svg>");
+  });
+});
+
+
 describe("drawWave", () => {
   it("writes an SVG file and returns the SVG", async () => {
     const dir = await mkdtemp(join(tmpdir(), "wavedraw-"));
@@ -231,6 +308,37 @@ describe("drawWave", () => {
       });
 
       expect(svg).toContain("<svg");
+      await expect(readFile(svgPath, "utf8")).resolves.toBe(svg);
+    } finally {
+      await rm(dir, { force: true, recursive: true });
+    }
+  });
+});
+
+
+describe("drawMelSpectrogram", () => {
+  it("writes an SVG file and returns the SVG", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "wavedraw-"));
+    const wavPath = join(dir, "input.wav");
+    const svgPath = join(dir, "mel.svg");
+
+    try {
+      await writeFile(wavPath, makePcmWav({
+        channels: 1,
+        sampleRate: 32,
+        bitsPerSample: 16,
+        samples: [Array.from({ length: 32 }, (_, frame) => Math.round(Math.sin((2 * Math.PI * frame) / 4) * 20000))]
+      }));
+
+      const svg = await drawMelSpectrogram(wavPath, {
+        width: 4,
+        height: 20,
+        output: svgPath,
+        fftSize: 8,
+        melBands: 4
+      });
+
+      expect(svg).toContain('aria-label="Mel spectrogram"');
       await expect(readFile(svgPath, "utf8")).resolves.toBe(svg);
     } finally {
       await rm(dir, { force: true, recursive: true });
