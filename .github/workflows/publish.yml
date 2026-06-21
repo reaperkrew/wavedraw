@@ -33,6 +33,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Length checks
+        run: npm run check:lengths
+
       - name: Test
         run: npm test
 
