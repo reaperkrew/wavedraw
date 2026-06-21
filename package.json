@@ -1,6 +1,6 @@
 {
   "name": "wavedraw",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Dependency-light WAV parsing, waveform rendering, and Mel spectrogram rendering for Node.js.",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,6 +23,9 @@
     "build": "npm run clean && tsc",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "check:file-length": "node scripts/check-file-length.mjs",
+    "check:function-length": "node scripts/check-function-length.mjs",
+    "check:lengths": "npm run check:file-length && npm run check:function-length",
     "prepack": "npm run build"
   },
   "keywords": [
