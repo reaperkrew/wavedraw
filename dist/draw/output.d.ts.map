@@ -1,1 +1,0 @@
-{"version":3,"file":"output.d.ts","sourceRoot":"","sources":["../../src/draw/output.ts"],"names":[],"mappings":"AAEA,MAAM,WAAW,gBAAgB;IAC/B,MAAM,CAAC,EAAE,MAAM,CAAC;IAChB,QAAQ,CAAC,EAAE,MAAM,CAAC;CACnB;AAED,wBAAsB,cAAc,CAAC,GAAG,EAAE,MAAM,EAAE,OAAO,EAAE,gBAAgB,GAAG,OAAO,CAAC,IAAI,CAAC,CAK1F"}
