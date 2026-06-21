@@ -4,6 +4,11 @@
 [![CI](https://github.com/reaperkrew/wavedraw/actions/workflows/ci.yml/badge.svg)](https://github.com/reaperkrew/wavedraw/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+> Wavedraw is a dependency-free wave and mel spectrogram parsing and rendering library for node.
+
+![Waveform rendered from wavedraw-example.wav](docs/images/waveform.png)
+![Mel spectrogram rendered from wavedraw-example.wav](docs/images/mel-spectrogram.png)
+
 Dependency-light WAV parsing, waveform rendering, and Mel spectrogram rendering for Node.js. Parse chunk-aware RIFF/WAVE PCM and float audio, summarize peaks/RMS/average waveform columns and Mel-band spectrograms, and render crisp SVG or PNG output with **zero runtime dependencies** (PNG uses Node's built-in `node:zlib` for compression).
 
 ## Features
@@ -43,10 +48,6 @@ await drawWave("input.wav", {
   }
 });
 ```
-
-### Waveform
-
-![Rendered waveform](docs/images/waveform.png)
 
 ## Rendering PNG output
 
@@ -180,10 +181,6 @@ await drawMelSpectrogram("input.wav", {
   colors: ["#020617", "#0f766e", "#facc15", "#f8fafc"]
 });
 ```
-
-### Mel Spectrogram
-
-![Rendered Mel spectrogram](docs/images/mel-spectrogram.png)
 
 Use `summarizeMelSpectrogram()` for normalized Mel-band data, or `renderMelSpectrogramSvg()` / `renderMelSpectrogramPng()` when you already have a summary.
 

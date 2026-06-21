@@ -3,3 +3,8 @@ dist
 .vscode
 .env
 .env.*
+
+# Local example source audio (regenerate docs/images via scripts/generate-examples.mjs)
+wavedraw-example.wav
+wavedraw-example.wav:Zone.Identifier
+*:Zone.Identifier
