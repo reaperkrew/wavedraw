@@ -2,6 +2,8 @@
 
 ## Operational rules
 
+- Always branch off the latest `main` before doing any work (`git checkout main && git pull && git checkout -b <branch>`); never commit directly to `main`.
+- All work happens on a feature branch and lands via pull request; `main` must stay releasable at all times.
 - Use Docker for repository operations, builds, tests, and other project commands in this repo.
 - Keep the runtime dependency surface as small as possible. Prefer implementing audio analysis and drawing locally instead of adding plotting, canvas, or DSP packages.
 - When committing here, use `reaperkrew` as both author and committer, not Codex.

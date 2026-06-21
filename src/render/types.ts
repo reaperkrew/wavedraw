@@ -24,3 +24,9 @@ export interface RenderMelSpectrogramSvgOptions {
   padding?: number;
   colors?: string[];
 }
+
+// PNG render options are structurally identical to the SVG render options:
+// width/height/background/padding and per-layer or color-stop styling carry
+// over unchanged. The aliases give the PNG API a correctly-named surface.
+export type RenderWaveformPngOptions = RenderWaveformSvgOptions;
+export type RenderMelSpectrogramPngOptions = RenderMelSpectrogramSvgOptions;

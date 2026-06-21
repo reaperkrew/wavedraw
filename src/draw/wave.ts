@@ -1,20 +1,24 @@
 import { normalizeTimeOption } from "../internal/time.js";
+import { renderWaveformPng } from "../render/png/waveform-png.js";
 import { renderWaveformSvg } from "../render/waveform-svg.js";
 import type { RenderWaveformSvgOptions } from "../render/types.js";
 import { summarizeWaveform } from "../waveform/summarize.js";
 import type { WavAudio } from "../wav/types.js";
 import type { SummarizeWaveformOptions, WaveformMetric } from "../waveform/types.js";
 import { readWavFile } from "../wav/read.js";
-import { writeSvgOutput } from "./output.js";
+import { resolveOutputFormat, writeDrawOutput, type DrawOutput } from "./output.js";
 import type { DrawWaveOptions } from "./types.js";
 
-export async function drawWave(path: string, options: DrawWaveOptions): Promise<string> {
+export async function drawWave(path: string, options: DrawWaveOptions): Promise<DrawOutput> {
   const audio = await readWavFile(path);
   const metrics = resolveWaveMetricsFromFlags(options);
   const summary = summarizeWaveform(audio, buildWaveformSummaryOptions(audio, options, metrics));
-  const svg = renderWaveformSvg(summary, buildWaveformRenderOptions(options));
-  await writeSvgOutput(svg, options);
-  return svg;
+  const renderOptions = buildWaveformRenderOptions(options);
+  const result = resolveOutputFormat(options) === "png"
+    ? renderWaveformPng(summary, renderOptions)
+    : renderWaveformSvg(summary, renderOptions);
+  await writeDrawOutput(result, options);
+  return result;
 }
 
 export function resolveWaveMetricsFromFlags(options: DrawWaveOptions): WaveformMetric[] {
