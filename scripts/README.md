@@ -29,3 +29,12 @@ npm run check:lengths
 ```
 
 Runs both scripts; used by the CI and Publish workflows after `lint` and before `test`.
+
+### `generate-examples.mjs`
+
+```bash
+npm run build && node scripts/generate-examples.mjs
+# or: npm run generate:examples
+```
+
+Regenerates the README hero assets (`docs/images/waveform.png` and `docs/images/mel-spectrogram.png`) from the local, gitignored `wavedraw-example.wav` at the repo root. The source WAV is intentionally not shipped (it is not part of the package), so this script is dev-only: it documents exactly how the committed example images were produced and lets a maintainer refresh them after renderer changes. It imports the built package from `../dist`, so run `npm run build` first.
