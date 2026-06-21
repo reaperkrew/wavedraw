@@ -27,8 +27,12 @@ export type {
 
 export { renderWaveformSvg } from "./render/waveform-svg.js";
 export { renderMelSpectrogramSvg } from "./render/spectrogram-svg.js";
+export { renderWaveformPng } from "./render/png/waveform-png.js";
+export { renderMelSpectrogramPng } from "./render/png/spectrogram-png.js";
 export type {
+  RenderMelSpectrogramPngOptions,
   RenderMelSpectrogramSvgOptions,
+  RenderWaveformPngOptions,
   RenderWaveformSvgOptions,
   WaveformLayerStyle
 } from "./render/types.js";

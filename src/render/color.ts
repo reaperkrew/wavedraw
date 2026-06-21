@@ -6,6 +6,10 @@ export interface RgbColor {
   blue: number;
 }
 
+export interface RgbaColor extends RgbColor {
+  alpha: number;
+}
+
 export function normalizeColorStops(colors: string[]): RgbColor[] {
   if (colors.length < 2) {
     throw new Error("colors must include at least two color stops");
@@ -28,16 +32,28 @@ export function parseHexColor(color: string): RgbColor {
 }
 
 export function interpolateColorStops(colors: RgbColor[], value: number): string {
+  return rgbToHex(interpolateColorStopsRgb(colors, value));
+}
+
+export function interpolateColorStopsRgb(colors: RgbColor[], value: number): RgbColor {
   const scaled = clamp(value, 0, 1) * (colors.length - 1);
   const index = Math.min(colors.length - 2, Math.floor(scaled));
   const ratio = scaled - index;
   const start = colors[index]!;
   const end = colors[index + 1]!;
-  return rgbToHex({
+  return {
     red: Math.round(start.red + (end.red - start.red) * ratio),
     green: Math.round(start.green + (end.green - start.green) * ratio),
     blue: Math.round(start.blue + (end.blue - start.blue) * ratio)
-  });
+  };
+}
+
+export function withAlpha(color: RgbColor, alpha: number): RgbaColor {
+  return { red: color.red, green: color.green, blue: color.blue, alpha };
+}
+
+export function parseHexColorRgba(color: string, alpha = 255): RgbaColor {
+  return withAlpha(parseHexColor(color), alpha);
 }
 
 export function rgbToHex(color: RgbColor): string {
