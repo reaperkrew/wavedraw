@@ -33,3 +33,5 @@ export interface RenderMelSpectrogramSvgOptions {
 // over unchanged. The aliases give the PNG API a correctly-named surface.
 export type RenderWaveformPngOptions = RenderWaveformSvgOptions;
 export type RenderMelSpectrogramPngOptions = RenderMelSpectrogramSvgOptions;
+export type RenderLinearSpectrogramSvgOptions = RenderMelSpectrogramSvgOptions;
+export type RenderLinearSpectrogramPngOptions = RenderMelSpectrogramSvgOptions;

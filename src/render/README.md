@@ -6,9 +6,11 @@ SVG and PNG rendering for waveform summaries and Mel spectrogram summaries. Pure
 
 - `renderWaveformSvg(summary, options)` — returns an SVG string.
 - `renderMelSpectrogramSvg(summary, options)` — returns an SVG string.
+- `renderLinearSpectrogramSvg(summary, options)` — returns an SVG string.
 - `renderWaveformPng(summary, options)` — returns a PNG `Uint8Array`.
 - `renderMelSpectrogramPng(summary, options)` — returns a PNG `Uint8Array`.
-- Types: `WaveformLayerStyle`, `RenderWaveformSvgOptions`, `RenderMelSpectrogramSvgOptions`, `RenderWaveformPngOptions`, `RenderMelSpectrogramPngOptions`, `ColormapName`.
+- `renderLinearSpectrogramPng(summary, options)` — returns a PNG `Uint8Array`.
+- Types: `WaveformLayerStyle`, `RenderWaveformSvgOptions`, `RenderMelSpectrogramSvgOptions`, `RenderLinearSpectrogramSvgOptions`, `RenderWaveformPngOptions`, `RenderMelSpectrogramPngOptions`, `RenderLinearSpectrogramPngOptions`, `ColormapName`.
 
 ## Internal modules
 
@@ -19,7 +21,9 @@ SVG and PNG rendering for waveform summaries and Mel spectrogram summaries. Pure
 - `svg.ts` — `openSvg`, `renderBackground`, `closeSvg` (shared SVG primitives).
 - `layer.ts` — `resolveWaveformLayers`, `normalizeLayer`, `buildWaveformGeometry`, `validateWaveformPadding`.
 - `waveform-svg.ts` — `renderWaveformSvg` orchestration plus per-layer renderers (`renderPeaksLayer`, `renderRmsLayer`, `renderAverageLayer`).
-- `spectrogram-svg.ts` — `renderMelSpectrogramSvg` orchestration plus `renderMelCells`, `renderMelCell`, `buildSpectrogramGeometry`, `validateSpectrogramPadding`.
+- `spectrogram-svg.ts` — `renderMelSpectrogramSvg` orchestration plus `buildSpectrogramGeometry`, `validateSpectrogramPadding`.
+- `linear-spectrogram-svg.ts` — `renderLinearSpectrogramSvg` orchestration (shares geometry + cell rendering with the Mel path).
+- `spectrogram-shared.ts` — `renderSpectrogramCellsSvg`, `renderSpectrogramCellSvg` (shared SVG cell rendering for both Mel and linear spectrograms).
 - `png/` — PNG rasterizer submodule; see `png/README.md`.
 
 ## Behavior notes

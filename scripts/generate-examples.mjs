@@ -11,7 +11,7 @@ import { mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { drawMelSpectrogram, drawWave } from "../dist/index.js";
+import { drawLinearSpectrogram, drawMelSpectrogram, drawWave } from "../dist/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
@@ -54,6 +54,19 @@ const melBase = {
   format: "png"
 };
 
+const linearOptions = {
+  width: 1200,
+  height: 360,
+  fftSize: 1024,
+  bins: 256,
+  minFrequency: 20,
+  maxFrequency: 8000,
+  dynamicRangeDb: 80,
+  colormap: "magma",
+  output: resolve(imagesDir, "linear-spectrogram.png"),
+  format: "png"
+};
+
 const colormaps = ["viridis", "magma", "plasma", "inferno", "turbo", "cividis", "grayscale"];
 
 function colormapOptions(colormap) {
@@ -69,5 +82,6 @@ async function renderColormaps() {
 await mkdir(imagesDir, { recursive: true });
 await drawWave(input, waveformOptions);
 await drawMelSpectrogram(input, melOptions);
+await drawLinearSpectrogram(input, linearOptions);
 await renderColormaps();
-console.log("Generated docs/images/waveform.png, mel-spectrogram.png, and mel-<colormap>.png presets");
+console.log("Generated docs/images/waveform.png, mel-spectrogram.png, linear-spectrogram.png, and mel-<colormap>.png presets");

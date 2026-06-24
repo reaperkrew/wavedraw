@@ -6,9 +6,10 @@ High-level convenience wrappers that compose `loadAudio` + `summarize*` + `rende
 
 - `drawWave(path, options)` — read an audio file (WAV or AIFF), summarize the waveform, render SVG or PNG, optionally write to `options.output` (or legacy `options.filename`), and return the rendered output (`string` for SVG, `Uint8Array` for PNG).
 - `drawMelSpectrogram(path, options)` — same shape for Mel spectrograms.
+- `drawLinearSpectrogram(path, options)` — same shape for linear-frequency STFT spectrograms.
 - `loadAudio(path)` — read a file and dispatch to `parseWav` or `parseAiff` based on the first 4 bytes.
 - `parseAudio(input)` — in-memory dispatcher: `RIFF` → `parseWav`, `FORM` → `parseAiff`.
-- Types: `DrawWaveOptions`, `DrawMelSpectrogramOptions`.
+- Types: `DrawWaveOptions`, `DrawMelSpectrogramOptions`, `DrawLinearSpectrogramOptions`.
 
 ## Internal modules
 
@@ -17,6 +18,7 @@ High-level convenience wrappers that compose `loadAudio` + `summarize*` + `rende
 - `output.ts` — `writeDrawOutput` (handles both `string` and `Uint8Array` payloads), `resolveOutputFormat` (auto-detects `.png` extension or honors `options.format`), `DrawOutput`, `DrawFormat`.
 - `wave.ts` — `drawWave`, `resolveWaveMetricsFromFlags`, `buildWaveformSummaryOptions`, `buildWaveformRenderOptions`.
 - `spectrogram.ts` — `drawMelSpectrogram`, `buildMelSummaryOptions`, `buildMelRenderOptions`.
+- `linear-spectrogram.ts` — `drawLinearSpectrogram`, `buildLinearSummaryOptions`, `buildLinearRenderOptions`.
 
 ## Behavior notes
 

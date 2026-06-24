@@ -31,11 +31,22 @@ export type {
   SummarizeMelSpectrogramOptions
 } from "./spectrogram/types.js";
 
+export { summarizeLinearSpectrogram } from "./spectrogram/linear.js";
+export type {
+  LinearSpectrogramFrame,
+  LinearSpectrogramSummary,
+  SummarizeLinearSpectrogramOptions
+} from "./spectrogram/linear-types.js";
+
 export { renderWaveformSvg } from "./render/waveform-svg.js";
 export { renderMelSpectrogramSvg } from "./render/spectrogram-svg.js";
+export { renderLinearSpectrogramSvg } from "./render/linear-spectrogram-svg.js";
 export { renderWaveformPng } from "./render/png/waveform-png.js";
 export { renderMelSpectrogramPng } from "./render/png/spectrogram-png.js";
+export { renderLinearSpectrogramPng } from "./render/png/linear-spectrogram-png.js";
 export type {
+  RenderLinearSpectrogramPngOptions,
+  RenderLinearSpectrogramSvgOptions,
   RenderMelSpectrogramPngOptions,
   RenderMelSpectrogramSvgOptions,
   RenderWaveformPngOptions,
@@ -46,4 +57,5 @@ export type { ColormapName } from "./render/colormaps.js";
 
 export { drawWave } from "./draw/wave.js";
 export { drawMelSpectrogram } from "./draw/spectrogram.js";
-export type { DrawMelSpectrogramOptions, DrawWaveOptions } from "./draw/types.js";
+export { drawLinearSpectrogram } from "./draw/linear-spectrogram.js";
+export type { DrawLinearSpectrogramOptions, DrawMelSpectrogramOptions, DrawWaveOptions } from "./draw/types.js";

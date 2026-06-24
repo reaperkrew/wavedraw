@@ -17,6 +17,7 @@ Dependency-light WAV/AIFF parsing, waveform rendering, and Mel spectrogram rende
 - **AIFF / AIFF-C parsing** — big-endian signed PCM (8/16/24/32-bit) and AIFC IEEE float (`fl32`/`fl64`); `drawWave`/`drawMelSpectrogram` auto-detect WAV vs AIFF by magic bytes.
 - **Waveform summaries** — per-column positive/negative peaks, RMS, and average, normalized to `[-1, 1]`.
 - **Mel spectrograms** — windowed FFT (Hann by default; selectable Hamming/Blackman/Bartlett/Rectangular), Mel filter bank, and power-to-dB conversion with configurable range.
+- **Linear-frequency spectrograms** — STFT spectrogram with evenly-spaced Hz bins for engineering analysis (harmonics, fault detection) alongside the perceptual Mel view.
 - **SVG and PNG rendering** — dependency-free SVG output and a hand-rolled PNG encoder (8-bit RGBA) for both waveforms and spectrograms.
 - **Named colormaps** — `viridis`, `magma`, `plasma`, `inferno`, `turbo`, `cividis`, and `grayscale` presets for spectrograms, sampled from matplotlib LUTs with zero new dependencies.
 - **Pure, typed API** — functional core with side effects pushed to the edge; full TypeScript types and ESM output.
@@ -187,6 +188,29 @@ await drawMelSpectrogram("input.wav", {
 
 Use `summarizeMelSpectrogram()` for normalized Mel-band data, or `renderMelSpectrogramSvg()` / `renderMelSpectrogramPng()` when you already have a summary.
 
+## Linear-frequency spectrograms
+
+When you want actual Hz bins instead of perceptual Mel bands (engineering analysis, harmonics, fault detection), use the linear STFT spectrogram — same option shape and renderers as the Mel spectrogram:
+
+```ts
+import { drawLinearSpectrogram } from "wavedraw";
+
+await drawLinearSpectrogram("input.wav", {
+  width: 1200,
+  height: 360,
+  fftSize: 1024,
+  bins: 256, // number of evenly-spaced frequency bins between minFrequency and maxFrequency
+  minFrequency: 20,
+  maxFrequency: 8000,
+  colormap: "magma",
+  output: "linear-spectrogram.png"
+});
+```
+
+![Linear spectrogram rendered from wavedraw-example.wav](docs/images/linear-spectrogram.png)
+
+Use `summarizeLinearSpectrogram()` for normalized bin data, or `renderLinearSpectrogramSvg()` / `renderLinearSpectrogramPng()` when you already have a summary.
+
 ## Colormaps
 
 Spectrograms accept a named `colormap` preset (overrides `colors`) for perceptually-uniform, colorblind-safe, and classic palettes — sampled from the canonical matplotlib LUTs and interpolated with zero new dependencies:
@@ -224,8 +248,9 @@ Omitting `colormap` (and `colors`) falls back to wavedraw's default navy→teal�
 
 | Function | Returns | Description |
 | --- | --- | --- |
-| `drawWave(path, options)` | `Promise<string \| Uint8Array>` | Read a WAV, summarize, render SVG/PNG, optionally write to disk. |
+| `drawWave(path, options)` | `Promise<string \| Uint8Array>` | Read a WAV/AIFF, summarize, render SVG/PNG, optionally write to disk. |
 | `drawMelSpectrogram(path, options)` | `Promise<string \| Uint8Array>` | Same shape for Mel spectrograms. |
+| `drawLinearSpectrogram(path, options)` | `Promise<string \| Uint8Array>` | Same shape for linear-frequency STFT spectrograms. |
 
 ### Parsing and analysis
 
@@ -239,6 +264,7 @@ Omitting `colormap` (and `colors`) falls back to wavedraw's default navy→teal�
 | `parseAudio(buffer)` | In-memory dispatcher: `RIFF` → `parseWav`, `FORM` → `parseAiff`. |
 | `summarizeWaveform(audio, options)` | Per-column peaks/RMS/average summary. |
 | `summarizeMelSpectrogram(audio, options)` | Normalized Mel-band spectrogram summary. |
+| `summarizeLinearSpectrogram(audio, options)` | Normalized linear-frequency spectrogram summary. |
 
 ### Renderers
 
@@ -248,8 +274,10 @@ Omitting `colormap` (and `colors`) falls back to wavedraw's default navy→teal�
 | `renderWaveformPng(summary, options)` | `Uint8Array` |
 | `renderMelSpectrogramSvg(summary, options)` | `string` |
 | `renderMelSpectrogramPng(summary, options)` | `Uint8Array` |
+| `renderLinearSpectrogramSvg(summary, options)` | `string` |
+| `renderLinearSpectrogramPng(summary, options)` | `Uint8Array` |
 
-All option types are exported: `DrawWaveOptions`, `DrawMelSpectrogramOptions`, `RenderWaveformSvgOptions`, `RenderWaveformPngOptions`, `RenderMelSpectrogramSvgOptions`, `RenderMelSpectrogramPngOptions`, `WaveformLayerStyle`, `SummarizeWaveformOptions`, `SummarizeMelSpectrogramOptions`.
+All option types are exported: `DrawWaveOptions`, `DrawMelSpectrogramOptions`, `DrawLinearSpectrogramOptions`, `RenderWaveformSvgOptions`, `RenderWaveformPngOptions`, `RenderMelSpectrogramSvgOptions`, `RenderMelSpectrogramPngOptions`, `RenderLinearSpectrogramSvgOptions`, `RenderLinearSpectrogramPngOptions`, `WaveformLayerStyle`, `SummarizeWaveformOptions`, `SummarizeMelSpectrogramOptions`, `SummarizeLinearSpectrogramOptions`, `ColormapName`, `WindowType`.
 
 ## Supported WAV input
 
