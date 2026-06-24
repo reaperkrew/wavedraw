@@ -5,12 +5,12 @@ import type { RenderWaveformSvgOptions } from "../render/types.js";
 import { summarizeWaveform } from "../waveform/summarize.js";
 import type { WavAudio } from "../wav/types.js";
 import type { SummarizeWaveformOptions, WaveformMetric } from "../waveform/types.js";
-import { readWavFile } from "../wav/read.js";
+import { loadAudio } from "./load.js";
 import { resolveOutputFormat, writeDrawOutput, type DrawOutput } from "./output.js";
 import type { DrawWaveOptions } from "./types.js";
 
 export async function drawWave(path: string, options: DrawWaveOptions): Promise<DrawOutput> {
-  const audio = await readWavFile(path);
+  const audio = await loadAudio(path);
   const metrics = resolveWaveMetricsFromFlags(options);
   const summary = summarizeWaveform(audio, buildWaveformSummaryOptions(audio, options, metrics));
   const renderOptions = buildWaveformRenderOptions(options);

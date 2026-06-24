@@ -11,7 +11,7 @@ import { mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { drawMelSpectrogram, drawWave } from "../dist/index.js";
+import { drawLinearSpectrogram, drawMelSpectrogram, drawWave } from "../dist/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
@@ -43,7 +43,62 @@ const melOptions = {
   format: "png"
 };
 
+const melBase = {
+  width: 1200,
+  height: 200,
+  fftSize: 1024,
+  melBands: 80,
+  minFrequency: 20,
+  maxFrequency: 8000,
+  dynamicRangeDb: 80,
+  format: "png"
+};
+
+const linearOptions = {
+  width: 1200,
+  height: 360,
+  fftSize: 1024,
+  bins: 256,
+  minFrequency: 20,
+  maxFrequency: 8000,
+  dynamicRangeDb: 80,
+  colormap: "magma",
+  output: resolve(imagesDir, "linear-spectrogram.png"),
+  format: "png"
+};
+
+const axesOptions = {
+  width: 1200,
+  height: 360,
+  fftSize: 1024,
+  melBands: 80,
+  minFrequency: 20,
+  maxFrequency: 8000,
+  dynamicRangeDb: 80,
+  padding: 48,
+  colormap: "viridis",
+  background: "#020617",
+  axes: { enabled: true },
+  output: resolve(imagesDir, "mel-spectrogram-axes.png"),
+  format: "png"
+};
+
+const colormaps = ["viridis", "magma", "plasma", "inferno", "turbo", "cividis", "grayscale"];
+
+function colormapOptions(colormap) {
+  return { ...melBase, colormap, output: resolve(imagesDir, `mel-${colormap}.png`) };
+}
+
+async function renderColormaps() {
+  for (const colormap of colormaps) {
+    await drawMelSpectrogram(input, colormapOptions(colormap));
+  }
+}
+
 await mkdir(imagesDir, { recursive: true });
 await drawWave(input, waveformOptions);
 await drawMelSpectrogram(input, melOptions);
-console.log("Generated docs/images/waveform.png and docs/images/mel-spectrogram.png");
+await drawMelSpectrogram(input, axesOptions);
+await drawLinearSpectrogram(input, linearOptions);
+await renderColormaps();
+console.log("Generated waveform, mel-spectrogram, mel-spectrogram-axes, linear-spectrogram, and colormap preset PNGs");

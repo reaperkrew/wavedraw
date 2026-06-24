@@ -6,7 +6,7 @@ export interface WavFormat {
   sampleRate: number;
   byteRate: number;
   blockAlign: number;
-  bitsPerSample: 8 | 16 | 24 | 32;
+  bitsPerSample: 8 | 16 | 24 | 32 | 64;
   dataOffset: number;
   dataLength: number;
 }

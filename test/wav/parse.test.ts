@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseWav } from "../../src/index.js";
 import { makeFloatWav, makePcmWav } from "../fixtures/wav.js";
+import { makeExtensibleWav, makeFloat64Wav } from "../fixtures/wav-extended.js";
 
 describe("parseWav", () => {
   it("parses 16-bit mono PCM and normalizes samples", () => {
@@ -96,6 +97,65 @@ describe("parseWav", () => {
 
     expect(audio.format.audioFormat).toBe("float");
     expect(Array.from(audio.channels[0]!)).toEqual([-1, 0.25, 1]);
+  });
+
+  it("supports WAVE_FORMAT_EXTENSIBLE PCM via subFormat GUID", () => {
+    const wav = makeExtensibleWav({
+      channels: 1,
+      sampleRate: 8000,
+      bitsPerSample: 16,
+      samples: [[-32768, 0, 32767]],
+      subFormatCode: 1
+    });
+
+    const audio = parseWav(wav);
+
+    expect(audio.format.audioFormat).toBe("pcm");
+    expect(audio.format.bitsPerSample).toBe(16);
+    expect(Array.from(audio.channels[0]!)).toEqual([-1, 0, 32767 / 32768]);
+  });
+
+  it("supports WAVE_FORMAT_EXTENSIBLE float via subFormat GUID", () => {
+    const wav = makeExtensibleWav({
+      channels: 2,
+      sampleRate: 48000,
+      bitsPerSample: 32,
+      samples: [[-0.5, 0.5], [0.25, -0.25]],
+      subFormatCode: 3
+    });
+
+    const audio = parseWav(wav);
+
+    expect(audio.format.audioFormat).toBe("float");
+    expect(audio.format.channels).toBe(2);
+    expect(Array.from(audio.channels[0]!)).toEqual([-0.5, 0.5]);
+    expect(Array.from(audio.channels[1]!)).toEqual([0.25, -0.25]);
+  });
+
+  it("supports 64-bit float WAV", () => {
+    const wav = makeFloat64Wav({
+      channels: 1,
+      sampleRate: 8000,
+      samples: [[-1, 0.25, 2]]
+    });
+
+    const audio = parseWav(wav);
+
+    expect(audio.format.audioFormat).toBe("float");
+    expect(audio.format.bitsPerSample).toBe(64);
+    expect(Array.from(audio.channels[0]!)).toEqual([-1, 0.25, 1]);
+  });
+
+  it("rejects PCM audio claiming 64-bit depth", () => {
+    const wav = makeExtensibleWav({
+      channels: 1,
+      sampleRate: 8000,
+      bitsPerSample: 64,
+      samples: [[0, 0]],
+      subFormatCode: 1
+    });
+
+    expect(() => parseWav(wav)).toThrow("is invalid for pcm audio");
   });
 
   it("rejects invalid input clearly", () => {

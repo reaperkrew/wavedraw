@@ -3,6 +3,10 @@ import { isSupportedBitsPerSample } from "./validate.js";
 
 const PCM_FORMAT = 1;
 const FLOAT_FORMAT = 3;
+const EXTENSIBLE_FORMAT = 0xfffe;
+
+const EXTENSIBLE_SUBFORMAT_OFFSET = 24;
+const EXTENSIBLE_MIN_SIZE = 40;
 
 interface FmtFields {
   audioFormatCode: number;
@@ -23,8 +27,19 @@ export function parseFmtChunk(view: DataView, offset: number, size: number): Omi
     throw new Error("Invalid WAV: fmt chunk is too small");
   }
   const fields = readFmtFields(view, offset);
-  const validated = validateFmtFields(fields.audioFormatCode, fields.bitsPerSample);
+  const effectiveCode = resolveAudioFormatCode(view, offset, size, fields.audioFormatCode);
+  const validated = validateFmtFields(effectiveCode, fields.bitsPerSample);
   return { ...fields, ...validated };
+}
+
+export function resolveAudioFormatCode(view: DataView, offset: number, size: number, code: number): number {
+  if (code !== EXTENSIBLE_FORMAT) {
+    return code;
+  }
+  if (size < EXTENSIBLE_MIN_SIZE) {
+    throw new Error("Invalid WAV: WAVE_FORMAT_EXTENSIBLE fmt chunk is too small");
+  }
+  return view.getUint16(offset + EXTENSIBLE_SUBFORMAT_OFFSET, true);
 }
 
 export function readFmtFields(view: DataView, offset: number): FmtFields {

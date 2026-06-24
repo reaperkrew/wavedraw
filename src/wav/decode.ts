@@ -18,7 +18,7 @@ export function decodeChannels(view: DataView, format: WavFormat, frames: number
 
 export function readSample(view: DataView, offset: number, format: WavFormat): number {
   if (format.audioFormat === "float") {
-    return clamp(view.getFloat32(offset, true), -1, 1);
+    return format.bitsPerSample === 64 ? clamp(view.getFloat64(offset, true), -1, 1) : clamp(view.getFloat32(offset, true), -1, 1);
   }
   switch (format.bitsPerSample) {
     case 8:
@@ -29,6 +29,8 @@ export function readSample(view: DataView, offset: number, format: WavFormat): n
       return normalizeSigned(readInt24(view, offset), 8388608);
     case 32:
       return normalizeSigned(view.getInt32(offset, true), 2147483648);
+    default:
+      return 0;
   }
 }
 

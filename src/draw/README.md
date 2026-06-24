@@ -1,19 +1,24 @@
 # draw
 
-High-level convenience wrappers that compose `readWavFile` + `summarize*` + `render*` and optionally write the result to disk. This is the **only** submodule that performs filesystem writes, so callers who want pure behavior can stay entirely within `wav/`, `waveform/`, `spectrogram/`, and `render/`.
+High-level convenience wrappers that compose `loadAudio` + `summarize*` + `render*` and optionally write the result to disk. This is the **only** submodule that performs filesystem writes, so callers who want pure behavior can stay entirely within `wav/`, `aiff/`, `waveform/`, `spectrogram/`, and `render/`.
 
 ## Public exports
 
-- `drawWave(path, options)` — read a WAV file, summarize the waveform, render SVG or PNG, optionally write to `options.output` (or legacy `options.filename`), and return the rendered output (`string` for SVG, `Uint8Array` for PNG).
+- `drawWave(path, options)` — read an audio file (WAV or AIFF), summarize the waveform, render SVG or PNG, optionally write to `options.output` (or legacy `options.filename`), and return the rendered output (`string` for SVG, `Uint8Array` for PNG).
 - `drawMelSpectrogram(path, options)` — same shape for Mel spectrograms.
-- Types: `DrawWaveOptions`, `DrawMelSpectrogramOptions`.
+- `drawLinearSpectrogram(path, options)` — same shape for linear-frequency STFT spectrograms.
+- `loadAudio(path)` — read a file and dispatch to `parseWav` or `parseAiff` based on the first 4 bytes.
+- `parseAudio(input)` — in-memory dispatcher: `RIFF` → `parseWav`, `FORM` → `parseAiff`.
+- Types: `DrawWaveOptions`, `DrawMelSpectrogramOptions`, `DrawLinearSpectrogramOptions`.
 
 ## Internal modules
 
+- `load.ts` — `loadAudio` / `parseAudio` magic-byte dispatcher (the single read edge for the draw helpers).
 - `types.ts` — public option types (draw options accept the legacy `maximums`/`filename` fields, a `format` override, and `HH:MM:SS` time strings via `TimeOption`).
 - `output.ts` — `writeDrawOutput` (handles both `string` and `Uint8Array` payloads), `resolveOutputFormat` (auto-detects `.png` extension or honors `options.format`), `DrawOutput`, `DrawFormat`.
 - `wave.ts` — `drawWave`, `resolveWaveMetricsFromFlags`, `buildWaveformSummaryOptions`, `buildWaveformRenderOptions`.
 - `spectrogram.ts` — `drawMelSpectrogram`, `buildMelSummaryOptions`, `buildMelRenderOptions`.
+- `linear-spectrogram.ts` — `drawLinearSpectrogram`, `buildLinearSummaryOptions`, `buildLinearRenderOptions`.
 
 ## Behavior notes
 

@@ -1,6 +1,7 @@
 import { normalizeTimeRange } from "../internal/time.js";
 import { validatePositiveInteger } from "../internal/validation.js";
 import type { WavAudio } from "../wav/types.js";
+import { resolveWindowType, type WindowType } from "./windows.js";
 import type { ResolvedMelOptions, SummarizeMelSpectrogramOptions } from "./types.js";
 
 export function resolveMelOptions(audio: WavAudio, options: SummarizeMelSpectrogramOptions): ResolvedMelOptions {
@@ -8,8 +9,9 @@ export function resolveMelOptions(audio: WavAudio, options: SummarizeMelSpectrog
   const melBands = resolveMelBands(options.melBands);
   const frequencies = resolveFrequencyRange(audio.format.sampleRate, options.minFrequency, options.maxFrequency);
   const dynamicRangeDb = resolveDynamicRangeDb(options.dynamicRangeDb);
+  const window = resolveWindowType(options.window);
   const timeRange = normalizeTimeRange(audio.durationSeconds, options.startSeconds, options.endSeconds);
-  return { fftSize, melBands, ...frequencies, dynamicRangeDb, ...timeRange };
+  return { fftSize, melBands, ...frequencies, dynamicRangeDb, window, ...timeRange };
 }
 
 export function resolveFftSize(value: number | undefined): number {

@@ -3,7 +3,7 @@ import type { WavAudio } from "../wav/types.js";
 import { computeMelFrames, normalizeMelFrames } from "./frames.js";
 import { resolveMelOptions } from "./options.js";
 import { createMelFilterbank } from "./filterbank.js";
-import { hannWindow } from "./spectrum.js";
+import { createWindow } from "./windows.js";
 import type {
   MelSpectrogramFrame,
   MelSpectrogramSummary,
@@ -57,7 +57,7 @@ interface MelPipeline {
 
 export function buildMelPipeline(audio: WavAudio, resolved: ResolvedMelOptions): MelPipeline {
   return {
-    window: hannWindow(resolved.fftSize),
+    window: createWindow(resolved.window, resolved.fftSize),
     filterbank: createMelFilterbank({
       fftSize: resolved.fftSize,
       melBands: resolved.melBands,
