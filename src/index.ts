@@ -7,6 +7,11 @@ export type {
   WavFormat
 } from "./wav/types.js";
 
+export { parseAiff, readAiffFile } from "./aiff/read.js";
+export type { AiffComm, AiffEncoding, AiffFlavor } from "./aiff/read.js";
+
+export { loadAudio, parseAudio } from "./draw/load.js";
+
 export { summarizeWaveform } from "./waveform/summarize.js";
 export type {
   SummarizeWaveformOptions,

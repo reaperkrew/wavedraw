@@ -12,9 +12,16 @@ export function validateFormatBasics(format: WavFormat): void {
   if (format.sampleRate < 1 || !Number.isInteger(format.sampleRate)) {
     throw new Error("Invalid WAV: sample rate must be a positive integer");
   }
-  if (format.audioFormat === "float" && format.bitsPerSample !== 32) {
-    throw new Error("Unsupported WAV: float audio must use 32 bits per sample");
+  if (!isValidDepthForFormat(format)) {
+    throw new Error(`Unsupported WAV: bit depth ${format.bitsPerSample} is invalid for ${format.audioFormat} audio`);
   }
+}
+
+export function isValidDepthForFormat(format: WavFormat): boolean {
+  if (format.audioFormat === "float") {
+    return format.bitsPerSample === 32 || format.bitsPerSample === 64;
+  }
+  return format.bitsPerSample === 8 || format.bitsPerSample === 16 || format.bitsPerSample === 24 || format.bitsPerSample === 32;
 }
 
 export function validateFormatAlignment(format: WavFormat): void {
@@ -32,5 +39,5 @@ export function validateFormatAlignment(format: WavFormat): void {
 }
 
 export function isSupportedBitsPerSample(value: number): value is WavFormat["bitsPerSample"] {
-  return value === 8 || value === 16 || value === 24 || value === 32;
+  return value === 8 || value === 16 || value === 24 || value === 32 || value === 64;
 }

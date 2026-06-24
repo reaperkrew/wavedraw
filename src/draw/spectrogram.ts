@@ -4,13 +4,13 @@ import { renderMelSpectrogramSvg } from "../render/spectrogram-svg.js";
 import type { RenderMelSpectrogramSvgOptions } from "../render/types.js";
 import { summarizeMelSpectrogram } from "../spectrogram/summarize.js";
 import type { SummarizeMelSpectrogramOptions } from "../spectrogram/types.js";
-import { readWavFile } from "../wav/read.js";
 import type { WavAudio } from "../wav/types.js";
+import { loadAudio } from "./load.js";
 import { resolveOutputFormat, writeDrawOutput, type DrawOutput } from "./output.js";
 import type { DrawMelSpectrogramOptions } from "./types.js";
 
 export async function drawMelSpectrogram(path: string, options: DrawMelSpectrogramOptions): Promise<DrawOutput> {
-  const audio = await readWavFile(path);
+  const audio = await loadAudio(path);
   const summary = summarizeMelSpectrogram(audio, buildMelSummaryOptions(audio, options));
   const renderOptions = buildMelRenderOptions(options);
   const result = resolveOutputFormat(options) === "png"

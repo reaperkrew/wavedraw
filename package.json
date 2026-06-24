@@ -1,6 +1,6 @@
 {
   "name": "wavedraw",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Dependency-light WAV parsing, waveform rendering, and Mel spectrogram rendering for Node.js.",
   "type": "module",
   "main": "./dist/index.js",
