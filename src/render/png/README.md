@@ -19,6 +19,7 @@ Optional PNG rasterizer. Produces 8-bit RGBA PNG `Uint8Array` output from the sa
 - `spectrogram-png.ts` — `renderMelSpectrogramPng` orchestration (delegates cell rasterization to `spectrogram-shared.ts`).
 - `linear-spectrogram-png.ts` — `renderLinearSpectrogramPng` orchestration (shares cell rasterization with the Mel path).
 - `spectrogram-shared.ts` — `rasterizeSpectrogramCellsPng`, `rasterizeSpectrogramCellPng` (shared raster cell rendering for both Mel and linear spectrograms).
+- `chrome.ts` — `rasterizeColorbarPng`, `computeColorbarPlacement` (opt-in PNG dB colorbar gradient; full text chrome is SVG-only).
 - `types.ts` — PNG render option type aliases.
 
 ## Behavior notes

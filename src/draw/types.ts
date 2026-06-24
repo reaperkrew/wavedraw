@@ -1,5 +1,6 @@
 import type { TimeOption } from "../internal/time.js";
 import type { ColormapName } from "../render/colormaps.js";
+import type { AxesOptions } from "../render/types.js";
 import type { DrawFormat } from "./output.js";
 import type { SummarizeLinearSpectrogramOptions } from "../spectrogram/linear-types.js";
 import type { SummarizeMelSpectrogramOptions } from "../spectrogram/types.js";
@@ -35,6 +36,7 @@ export interface DrawMelSpectrogramOptions extends Omit<SummarizeMelSpectrogramO
   colors?: string[];
   colormap?: ColormapName;
   padding?: number;
+  axes?: AxesOptions;
   start?: TimeOption;
   end?: TimeOption;
 }
@@ -48,6 +50,7 @@ export interface DrawLinearSpectrogramOptions extends Omit<SummarizeLinearSpectr
   colors?: string[];
   colormap?: ColormapName;
   padding?: number;
+  axes?: AxesOptions;
   start?: TimeOption;
   end?: TimeOption;
 }

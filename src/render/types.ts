@@ -11,6 +11,16 @@ export interface WaveformLayerConfig {
   average?: WaveformLayerStyle | false;
 }
 
+export interface AxesOptions {
+  enabled?: boolean;
+  timeAxis?: boolean;
+  frequencyAxis?: boolean;
+  colorbar?: boolean;
+  ticks?: number;
+  color?: string;
+  fontSize?: number;
+}
+
 export interface RenderWaveformSvgOptions {
   width?: number;
   height: number;
@@ -26,6 +36,7 @@ export interface RenderMelSpectrogramSvgOptions {
   padding?: number;
   colors?: string[];
   colormap?: ColormapName;
+  axes?: AxesOptions;
 }
 
 // PNG render options are structurally identical to the SVG render options:

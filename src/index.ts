@@ -45,6 +45,7 @@ export { renderWaveformPng } from "./render/png/waveform-png.js";
 export { renderMelSpectrogramPng } from "./render/png/spectrogram-png.js";
 export { renderLinearSpectrogramPng } from "./render/png/linear-spectrogram-png.js";
 export type {
+  AxesOptions,
   RenderLinearSpectrogramPngOptions,
   RenderLinearSpectrogramSvgOptions,
   RenderMelSpectrogramPngOptions,

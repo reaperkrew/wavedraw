@@ -20,6 +20,7 @@ Dependency-light WAV/AIFF parsing, waveform rendering, and Mel spectrogram rende
 - **Linear-frequency spectrograms** — STFT spectrogram with evenly-spaced Hz bins for engineering analysis (harmonics, fault detection) alongside the perceptual Mel view.
 - **SVG and PNG rendering** — dependency-free SVG output and a hand-rolled PNG encoder (8-bit RGBA) for both waveforms and spectrograms.
 - **Named colormaps** — `viridis`, `magma`, `plasma`, `inferno`, `turbo`, `cividis`, and `grayscale` presets for spectrograms, sampled from matplotlib LUTs with zero new dependencies.
+- **Chart chrome** — opt-in time axis, frequency axis, and dB colorbar turn spectrogram output into publication-ready labeled charts.
 - **Pure, typed API** — functional core with side effects pushed to the edge; full TypeScript types and ESM output.
 - **Small by design** — `npm audit` clean, no native modules, no canvas or font stack.
 
@@ -242,6 +243,28 @@ Each preset, rendered from `wavedraw-example.wav`:
 
 Omitting `colormap` (and `colors`) falls back to wavedraw's default navy→teal→yellow→white palette.
 
+## Axes and labels
+
+Spectrograms accept an opt-in `axes` option that adds a time axis (bottom), frequency axis (left), and a dB colorbar (right), turning the output into a labeled, publication-ready chart. SVG renders full text labels; PNG renders the colorbar gradient. Use `padding` to reserve margin space:
+
+```ts
+import { drawMelSpectrogram } from "wavedraw";
+
+await drawMelSpectrogram("input.wav", {
+  width: 1200,
+  height: 360,
+  padding: 48,
+  colormap: "viridis",
+  background: "#020617",
+  axes: { enabled: true }, // timeAxis/frequencyAxis/colorbar default on; ticks, color, fontSize tunable
+  output: "mel-axes.png"
+});
+```
+
+![Mel spectrogram with axes and colorbar](docs/images/mel-spectrogram-axes.png)
+
+Chrome is fully opt-in: with `axes` omitted, output is byte-identical to the bare renderer.
+
 ## API reference
 
 ### High-level draw helpers
@@ -277,7 +300,7 @@ Omitting `colormap` (and `colors`) falls back to wavedraw's default navy→teal�
 | `renderLinearSpectrogramSvg(summary, options)` | `string` |
 | `renderLinearSpectrogramPng(summary, options)` | `Uint8Array` |
 
-All option types are exported: `DrawWaveOptions`, `DrawMelSpectrogramOptions`, `DrawLinearSpectrogramOptions`, `RenderWaveformSvgOptions`, `RenderWaveformPngOptions`, `RenderMelSpectrogramSvgOptions`, `RenderMelSpectrogramPngOptions`, `RenderLinearSpectrogramSvgOptions`, `RenderLinearSpectrogramPngOptions`, `WaveformLayerStyle`, `SummarizeWaveformOptions`, `SummarizeMelSpectrogramOptions`, `SummarizeLinearSpectrogramOptions`, `ColormapName`, `WindowType`.
+All option types are exported: `DrawWaveOptions`, `DrawMelSpectrogramOptions`, `DrawLinearSpectrogramOptions`, `RenderWaveformSvgOptions`, `RenderWaveformPngOptions`, `RenderMelSpectrogramSvgOptions`, `RenderMelSpectrogramPngOptions`, `RenderLinearSpectrogramSvgOptions`, `RenderLinearSpectrogramPngOptions`, `WaveformLayerStyle`, `AxesOptions`, `SummarizeWaveformOptions`, `SummarizeMelSpectrogramOptions`, `SummarizeLinearSpectrogramOptions`, `ColormapName`, `WindowType`.
 
 ## Supported WAV input
 

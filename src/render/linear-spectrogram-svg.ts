@@ -1,6 +1,8 @@
+import { resolveAxesConfig } from "./axes.js";
 import { normalizeColorStops } from "./color.js";
 import { resolveSpectrogramColors } from "./colormaps.js";
 import { renderSpectrogramCellsSvg } from "./spectrogram-shared.js";
+import { renderSpectrogramChromeSvg } from "./svg-axes.js";
 import { buildSpectrogramGeometry } from "./spectrogram-svg.js";
 import { closeSvg, openSvg, renderBackground } from "./svg.js";
 import type { LinearSpectrogramSummary } from "../spectrogram/linear-types.js";
@@ -14,6 +16,7 @@ export function renderLinearSpectrogramSvg(summary: LinearSpectrogramSummary, op
     elements.push(renderBackground(options.background));
   }
   elements.push(...renderSpectrogramCellsSvg(summary.spectrogram, summary.bins, geometry, colors));
+  elements.push(...renderSpectrogramChromeSvg(summary, geometry, colors, resolveAxesConfig(options.axes)));
   elements.push(closeSvg);
   return elements.join("");
 }

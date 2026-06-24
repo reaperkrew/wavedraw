@@ -1,8 +1,10 @@
 import { validatePositiveInteger } from "../internal/validation.js";
 import type { MelSpectrogramSummary } from "../spectrogram/types.js";
+import { resolveAxesConfig } from "./axes.js";
 import { normalizeColorStops, type RgbColor } from "./color.js";
 import { resolveSpectrogramColors } from "./colormaps.js";
 import { renderSpectrogramCellsSvg } from "./spectrogram-shared.js";
+import { renderSpectrogramChromeSvg } from "./svg-axes.js";
 import { closeSvg, openSvg, renderBackground } from "./svg.js";
 import type { RenderMelSpectrogramSvgOptions } from "./types.js";
 
@@ -14,6 +16,7 @@ export function renderMelSpectrogramSvg(summary: MelSpectrogramSummary, options:
     elements.push(renderBackground(options.background));
   }
   elements.push(...renderSpectrogramCellsSvg(summary.spectrogram, summary.melBands, geometry, colors));
+  elements.push(...renderSpectrogramChromeSvg(summary, geometry, colors, resolveAxesConfig(options.axes)));
   elements.push(closeSvg);
   return elements.join("");
 }

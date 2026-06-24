@@ -67,6 +67,22 @@ const linearOptions = {
   format: "png"
 };
 
+const axesOptions = {
+  width: 1200,
+  height: 360,
+  fftSize: 1024,
+  melBands: 80,
+  minFrequency: 20,
+  maxFrequency: 8000,
+  dynamicRangeDb: 80,
+  padding: 48,
+  colormap: "viridis",
+  background: "#020617",
+  axes: { enabled: true },
+  output: resolve(imagesDir, "mel-spectrogram-axes.png"),
+  format: "png"
+};
+
 const colormaps = ["viridis", "magma", "plasma", "inferno", "turbo", "cividis", "grayscale"];
 
 function colormapOptions(colormap) {
@@ -82,6 +98,7 @@ async function renderColormaps() {
 await mkdir(imagesDir, { recursive: true });
 await drawWave(input, waveformOptions);
 await drawMelSpectrogram(input, melOptions);
+await drawMelSpectrogram(input, axesOptions);
 await drawLinearSpectrogram(input, linearOptions);
 await renderColormaps();
-console.log("Generated docs/images/waveform.png, mel-spectrogram.png, linear-spectrogram.png, and mel-<colormap>.png presets");
+console.log("Generated waveform, mel-spectrogram, mel-spectrogram-axes, linear-spectrogram, and colormap preset PNGs");
