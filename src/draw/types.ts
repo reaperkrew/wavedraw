@@ -1,4 +1,5 @@
 import type { TimeOption } from "../internal/time.js";
+import type { ColormapName } from "../render/colormaps.js";
 import type { DrawFormat } from "./output.js";
 import type { SummarizeMelSpectrogramOptions } from "../spectrogram/types.js";
 import type { SummarizeWaveformOptions } from "../waveform/types.js";
@@ -31,6 +32,7 @@ export interface DrawMelSpectrogramOptions extends Omit<SummarizeMelSpectrogramO
   format?: DrawFormat;
   background?: string;
   colors?: string[];
+  colormap?: ColormapName;
   padding?: number;
   start?: TimeOption;
   end?: TimeOption;

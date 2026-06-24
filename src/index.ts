@@ -42,6 +42,7 @@ export type {
   RenderWaveformSvgOptions,
   WaveformLayerStyle
 } from "./render/types.js";
+export type { ColormapName } from "./render/colormaps.js";
 
 export { drawWave } from "./draw/wave.js";
 export { drawMelSpectrogram } from "./draw/spectrogram.js";

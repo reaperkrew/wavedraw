@@ -18,6 +18,7 @@ Dependency-light WAV/AIFF parsing, waveform rendering, and Mel spectrogram rende
 - **Waveform summaries** — per-column positive/negative peaks, RMS, and average, normalized to `[-1, 1]`.
 - **Mel spectrograms** — windowed FFT (Hann by default; selectable Hamming/Blackman/Bartlett/Rectangular), Mel filter bank, and power-to-dB conversion with configurable range.
 - **SVG and PNG rendering** — dependency-free SVG output and a hand-rolled PNG encoder (8-bit RGBA) for both waveforms and spectrograms.
+- **Named colormaps** — `viridis`, `magma`, `plasma`, `inferno`, `turbo`, `cividis`, and `grayscale` presets for spectrograms, sampled from matplotlib LUTs with zero new dependencies.
 - **Pure, typed API** — functional core with side effects pushed to the edge; full TypeScript types and ESM output.
 - **Small by design** — `npm audit` clean, no native modules, no canvas or font stack.
 
@@ -185,6 +186,37 @@ await drawMelSpectrogram("input.wav", {
 ```
 
 Use `summarizeMelSpectrogram()` for normalized Mel-band data, or `renderMelSpectrogramSvg()` / `renderMelSpectrogramPng()` when you already have a summary.
+
+## Colormaps
+
+Spectrograms accept a named `colormap` preset (overrides `colors`) for perceptually-uniform, colorblind-safe, and classic palettes — sampled from the canonical matplotlib LUTs and interpolated with zero new dependencies:
+
+```ts
+import { drawMelSpectrogram } from "wavedraw";
+
+await drawMelSpectrogram("input.wav", {
+  width: 1200,
+  height: 360,
+  colormap: "viridis", // "viridis" | "magma" | "plasma" | "inferno" | "turbo" | "cividis" | "grayscale"
+  output: "mel-viridis.png"
+});
+```
+
+Each preset, rendered from `wavedraw-example.wav`:
+
+| `viridis` | `magma` | `plasma` |
+| --- | --- | --- |
+| ![viridis](docs/images/mel-viridis.png) | ![magma](docs/images/mel-magma.png) | ![plasma](docs/images/mel-plasma.png) |
+
+| `inferno` | `turbo` | `cividis` |
+| --- | --- | --- |
+| ![inferno](docs/images/mel-inferno.png) | ![turbo](docs/images/mel-turbo.png) | ![cividis](docs/images/mel-cividis.png) |
+
+| `grayscale` |
+| --- |
+| ![grayscale](docs/images/mel-grayscale.png) |
+
+Omitting `colormap` (and `colors`) falls back to wavedraw's default navy→teal→yellow→white palette.
 
 ## API reference
 

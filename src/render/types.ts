@@ -1,3 +1,5 @@
+import type { ColormapName } from "./colormaps.js";
+
 export interface WaveformLayerStyle {
   color?: string;
   strokeWidth?: number;
@@ -23,6 +25,7 @@ export interface RenderMelSpectrogramSvgOptions {
   background?: string;
   padding?: number;
   colors?: string[];
+  colormap?: ColormapName;
 }
 
 // PNG render options are structurally identical to the SVG render options:

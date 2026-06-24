@@ -43,7 +43,31 @@ const melOptions = {
   format: "png"
 };
 
+const melBase = {
+  width: 1200,
+  height: 200,
+  fftSize: 1024,
+  melBands: 80,
+  minFrequency: 20,
+  maxFrequency: 8000,
+  dynamicRangeDb: 80,
+  format: "png"
+};
+
+const colormaps = ["viridis", "magma", "plasma", "inferno", "turbo", "cividis", "grayscale"];
+
+function colormapOptions(colormap) {
+  return { ...melBase, colormap, output: resolve(imagesDir, `mel-${colormap}.png`) };
+}
+
+async function renderColormaps() {
+  for (const colormap of colormaps) {
+    await drawMelSpectrogram(input, colormapOptions(colormap));
+  }
+}
+
 await mkdir(imagesDir, { recursive: true });
 await drawWave(input, waveformOptions);
 await drawMelSpectrogram(input, melOptions);
-console.log("Generated docs/images/waveform.png and docs/images/mel-spectrogram.png");
+await renderColormaps();
+console.log("Generated docs/images/waveform.png, mel-spectrogram.png, and mel-<colormap>.png presets");

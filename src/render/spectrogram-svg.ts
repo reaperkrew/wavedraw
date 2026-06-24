@@ -2,13 +2,14 @@ import { clamp } from "../internal/math.js";
 import { validatePositiveInteger } from "../internal/validation.js";
 import type { MelSpectrogramFrame, MelSpectrogramSummary } from "../spectrogram/types.js";
 import { interpolateColorStops, normalizeColorStops, type RgbColor } from "./color.js";
+import { resolveSpectrogramColors } from "./colormaps.js";
 import { formatNumber } from "./format.js";
 import { closeSvg, openSvg, renderBackground } from "./svg.js";
 import type { RenderMelSpectrogramSvgOptions } from "./types.js";
 
 export function renderMelSpectrogramSvg(summary: MelSpectrogramSummary, options: RenderMelSpectrogramSvgOptions): string {
   const geometry = buildSpectrogramGeometry(summary.width, summary.melBands, options);
-  const colors = normalizeColorStops(options.colors ?? ["#020617", "#0f766e", "#facc15", "#f8fafc"]);
+  const colors = normalizeColorStops(resolveSpectrogramColors(options));
   const elements: string[] = [openSvg(geometry.width, geometry.height, "Mel spectrogram")];
   if (options.background) {
     elements.push(renderBackground(options.background));

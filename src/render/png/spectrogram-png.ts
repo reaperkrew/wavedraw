@@ -2,6 +2,7 @@ import { clamp } from "../../internal/math.js";
 import type { MelSpectrogramFrame, MelSpectrogramSummary } from "../../spectrogram/types.js";
 import { buildSpectrogramGeometry, type SpectrogramGeometry } from "../spectrogram-svg.js";
 import { interpolateColorStopsRgb, normalizeColorStops, parseHexColorRgba, type RgbColor } from "../color.js";
+import { resolveSpectrogramColors } from "../colormaps.js";
 import { createBitmap, type Bitmap } from "./bitmap.js";
 import { fillRect } from "./draw.js";
 import { encodePng } from "./encoder.js";
@@ -9,7 +10,7 @@ import type { RenderMelSpectrogramPngOptions } from "../types.js";
 
 export function renderMelSpectrogramPng(summary: MelSpectrogramSummary, options: RenderMelSpectrogramPngOptions): Uint8Array {
   const geometry = buildSpectrogramGeometry(summary.width, summary.melBands, options);
-  const colors = normalizeColorStops(options.colors ?? ["#020617", "#0f766e", "#facc15", "#f8fafc"]);
+  const colors = normalizeColorStops(resolveSpectrogramColors(options));
   const background = options.background ? parseHexColorRgba(options.background, 255) : undefined;
   const bitmap = createBitmap(geometry.width, geometry.height, background);
   rasterizeMelCells(summary, geometry, colors, bitmap);

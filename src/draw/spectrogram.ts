@@ -43,6 +43,7 @@ export function buildMelRenderOptions(options: DrawMelSpectrogramOptions): Rende
   };
   if (options.padding !== undefined) renderOptions.padding = options.padding;
   if (options.colors !== undefined) renderOptions.colors = options.colors;
+  if (options.colormap !== undefined) renderOptions.colormap = options.colormap;
   if (options.background !== undefined) renderOptions.background = options.background;
   return renderOptions;
 }
