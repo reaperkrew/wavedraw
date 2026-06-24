@@ -16,7 +16,7 @@ Dependency-light WAV/AIFF parsing, waveform rendering, and Mel spectrogram rende
 - **Chunk-aware WAV parsing** — RIFF/WAVE with `fmt `/`data` chunk scanning; handles 8/16/24/32-bit PCM and 32/64-bit float, mono and stereo, and resolves `WAVE_FORMAT_EXTENSIBLE` (0xFFFE) via its SubFormat GUID so pro-audio exports load cleanly.
 - **AIFF / AIFF-C parsing** — big-endian signed PCM (8/16/24/32-bit) and AIFC IEEE float (`fl32`/`fl64`); `drawWave`/`drawMelSpectrogram` auto-detect WAV vs AIFF by magic bytes.
 - **Waveform summaries** — per-column positive/negative peaks, RMS, and average, normalized to `[-1, 1]`.
-- **Mel spectrograms** — Hann-windowed FFT, Mel filter bank, and power-to-dB conversion with configurable range.
+- **Mel spectrograms** — windowed FFT (Hann by default; selectable Hamming/Blackman/Bartlett/Rectangular), Mel filter bank, and power-to-dB conversion with configurable range.
 - **SVG and PNG rendering** — dependency-free SVG output and a hand-rolled PNG encoder (8-bit RGBA) for both waveforms and spectrograms.
 - **Pure, typed API** — functional core with side effects pushed to the edge; full TypeScript types and ESM output.
 - **Small by design** — `npm audit` clean, no native modules, no canvas or font stack.
@@ -177,6 +177,7 @@ await drawMelSpectrogram("input.wav", {
   minFrequency: 20,
   maxFrequency: 8000,
   dynamicRangeDb: 80,
+  window: "hann", // "hann" | "hamming" | "blackman" | "bartlett" | "rectangular"
   output: "mel-spectrogram.png",
   background: "#020617",
   colors: ["#020617", "#0f766e", "#facc15", "#f8fafc"]

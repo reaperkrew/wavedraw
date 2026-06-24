@@ -31,10 +31,3 @@ export function computeBinMagnitude(
 
   return (real * real + imaginary * imaginary) / fftSize;
 }
-
-export function hannWindow(size: number): Float64Array {
-  if (size === 1) {
-    return new Float64Array([1]);
-  }
-  return Float64Array.from({ length: size }, (_, index) => 0.5 - 0.5 * Math.cos((2 * Math.PI * index) / (size - 1)));
-}

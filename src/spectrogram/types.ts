@@ -1,3 +1,5 @@
+import type { WindowType } from "./windows.js";
+
 export type SpectrogramChannel = number | "mix";
 
 export interface SummarizeMelSpectrogramOptions {
@@ -10,6 +12,7 @@ export interface SummarizeMelSpectrogramOptions {
   minFrequency?: number;
   maxFrequency?: number;
   dynamicRangeDb?: number;
+  window?: WindowType;
 }
 
 export interface MelSpectrogramFrame {
@@ -47,4 +50,5 @@ export interface ResolvedMelOptions {
   dynamicRangeDb: number;
   startSeconds: number;
   endSeconds: number;
+  window: WindowType;
 }

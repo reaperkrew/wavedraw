@@ -42,4 +42,17 @@ describe("summarizeMelSpectrogram", () => {
     expect(() => summarizeMelSpectrogram(audio, { width: 1, fftSize: 1 })).toThrow("fftSize must be at least 2");
     expect(() => summarizeMelSpectrogram(audio, { width: 1, maxFrequency: 9 })).toThrow("maxFrequency cannot exceed the Nyquist frequency");
   });
+
+  it("honors the window option and defaults to hann", () => {
+    const samples = Array.from({ length: 64 }, (_, frame) => Math.round(Math.sin((2 * Math.PI * frame) / 8) * 24000));
+    const audio = parseWav(makePcmWav({ channels: 1, sampleRate: 64, bitsPerSample: 16, samples: [samples] }));
+
+    const base = { width: 4, fftSize: 16, melBands: 6, minFrequency: 0, maxFrequency: 32, dynamicRangeDb: 60 };
+    const hann = summarizeMelSpectrogram(audio, base);
+    const hannExplicit = summarizeMelSpectrogram(audio, { ...base, window: "hann" });
+    const hamming = summarizeMelSpectrogram(audio, { ...base, window: "hamming" });
+
+    expect(hannExplicit.spectrogram).toEqual(hann.spectrogram);
+    expect(hamming.spectrogram).not.toEqual(hann.spectrogram);
+  });
 });

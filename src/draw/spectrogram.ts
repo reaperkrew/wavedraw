@@ -32,6 +32,7 @@ export function buildMelSummaryOptions(audio: WavAudio, options: DrawMelSpectrog
   if (options.minFrequency !== undefined) summaryOptions.minFrequency = options.minFrequency;
   if (options.maxFrequency !== undefined) summaryOptions.maxFrequency = options.maxFrequency;
   if (options.dynamicRangeDb !== undefined) summaryOptions.dynamicRangeDb = options.dynamicRangeDb;
+  if (options.window !== undefined) summaryOptions.window = options.window;
   return summaryOptions;
 }
 

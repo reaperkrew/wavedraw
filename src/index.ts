@@ -23,6 +23,7 @@ export type {
 } from "./waveform/types.js";
 
 export { summarizeMelSpectrogram } from "./spectrogram/summarize.js";
+export type { WindowType } from "./spectrogram/windows.js";
 export type {
   MelSpectrogramFrame,
   MelSpectrogramSummary,
