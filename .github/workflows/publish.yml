@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -62,3 +62,18 @@ jobs:
       - name: Publish package
         if: steps.published.outputs.published == 'false'
         run: npm publish --access public
+
+      - name: Tag release
+        if: steps.published.outputs.published == 'false'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+          git fetch --tags
+          if git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
+            echo "tag already exists: $TAG — skipping tag creation"
+            exit 0
+          fi
+          git config user.name reaperkrew
+          git config user.email reaperkrew@users.noreply.github.com
+          git tag -a "$TAG" -m "wavedraw@$VERSION"
+          git push origin "$TAG"
