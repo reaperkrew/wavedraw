@@ -48,5 +48,17 @@ jobs:
       - name: Verify package contents
         run: npm pack --dry-run
 
+      - name: Check if version already published
+        id: published
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "wavedraw@$VERSION" version --silent > /dev/null 2>&1; then
+            echo "already published: wavedraw@$VERSION — skipping publish"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish package
+        if: steps.published.outputs.published == 'false'
         run: npm publish --access public
